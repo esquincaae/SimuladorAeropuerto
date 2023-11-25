@@ -1,74 +1,117 @@
 package com.example.simuladoraeropuerto.views;
 
-import javafx.scene.layout.Pane;
+import javafx.geometry.Insets;
+import javafx.scene.layout.*;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
 public class VistaPrincipal {
 
     public Pane crearContenido() {
-        Pane root = new Pane();
+        VBox root = new VBox(20);
+        root.setPadding(new Insets(20));
+        root.setStyle("-fx-background-color: #F0F0F0;");
 
-        // Área de control de pasaportes
-        Rectangle areaControlPasaportes = new Rectangle(300, 100, Color.LIGHTBLUE);
-        areaControlPasaportes.setX(10);
-        areaControlPasaportes.setY(10);
-        Text textoControlPasaportes = new Text(20, 50, "Control de Pasaportes");
+        Pane areaEntrada = crearAreaEntrada();
+        Pane areaControlPasaportes = crearAreaControlPasaportes();
+        Pane areaManejoEquipaje = crearAreaManejoEquipaje();
+        Pane zonaEspera = crearZonaEspera();
 
-        // Cabinas de control de pasaportes
-        for (int i = 0; i < 10; i++) {
-            Rectangle cabina = new Rectangle(20, 20, Color.GRAY);
-            cabina.setX(15 + i * 30);
-            cabina.setY(15);
-            root.getChildren().add(cabina);
-        }
-
-        // Área de manejo de equipaje
-        Rectangle areaManejoEquipaje = new Rectangle(300, 100, Color.BEIGE);
-        areaManejoEquipaje.setX(10);
-        areaManejoEquipaje.setY(120);
-        Text textoManejoEquipaje = new Text(20, 160, "Manejo de Equipaje");
-
-        // Cinta transportadora
-        Rectangle cintaEquipaje = new Rectangle(280, 20, Color.DARKGRAY);
-        cintaEquipaje.setX(20);
-        cintaEquipaje.setY(190);
-
-        // Zona de espera
-        Rectangle zonaEspera = new Rectangle(300, 100, Color.LIGHTGREEN);
-        zonaEspera.setX(10);
-        zonaEspera.setY(230);
-        Text textoZonaEspera = new Text(20, 270, "Zona de Espera");
-
-        // Representación de Pasajeros (Círculos Azules)
-        for (int i = 0; i < 5; i++) {
-            Circle pasajero = new Circle(10, Color.BLUE);
-            pasajero.setCenterX(50 + i * 20);
-            pasajero.setCenterY(300);
-            root.getChildren().add(pasajero);
-        }
-
-        // Representación de Agentes de Control (Círculos Rojos)
-        for (int i = 0; i < 10; i++) {
-            Circle agente = new Circle(10, Color.RED);
-            agente.setCenterX(15 + i * 30);
-            agente.setCenterY(40);
-            root.getChildren().add(agente);
-        }
-
-        // Representación de Operadores de Equipaje (Círculos Verdes)
-        Circle operador = new Circle(10, Color.GREEN);
-        operador.setCenterX(20);
-        operador.setCenterY(210);
-        root.getChildren().add(operador);
-
-        // Agregar todos los elementos al root
-        root.getChildren().addAll(areaControlPasaportes, areaManejoEquipaje, zonaEspera,
-                textoControlPasaportes, textoManejoEquipaje, textoZonaEspera,
-                cintaEquipaje);
+        root.getChildren().addAll(areaEntrada, areaControlPasaportes, areaManejoEquipaje, zonaEspera);
 
         return root;
+    }
+
+
+    private Pane crearAreaControlPasaportes() {
+        Pane pane = new Pane();
+        pane.setPadding(new Insets(10));
+        Rectangle area = new Rectangle(500, 150, Color.LIGHTBLUE);
+        Text texto = new Text("Control de Pasaportes");
+        texto.setFont(new Font("Arial", 20));
+        texto.setX(20);
+        texto.setY(35);
+        pane.getChildren().addAll(area, texto);
+
+        for (int i = 0; i < 10; i++) {
+            Rectangle cabina = new Rectangle(30, 30, Color.GRAY);
+            cabina.setX(40 + i * 45);
+            cabina.setY(60);
+            pane.getChildren().add(cabina);
+
+            Circle agente = new Circle(15, Color.RED);
+            agente.setCenterX(55 + i * 45);
+            agente.setCenterY(110);
+            pane.getChildren().add(agente);
+        }
+
+        return pane;
+    }
+
+    private Pane crearAreaEntrada() {
+        Pane pane = new Pane();
+        pane.setPadding(new Insets(10));
+        Rectangle area = new Rectangle(500, 100, Color.SANDYBROWN);
+        Text texto = new Text("Entrada del Aeropuerto");
+        texto.setFont(new Font("Arial", 20));
+        texto.setX(20);
+        texto.setY(35);
+
+        // Representación visual de los pasajeros llegando
+        for (int i = 0; i < 5; i++) {
+            Circle pasajero = new Circle(15, Color.BLUE);
+            pasajero.setCenterX(100 + i * 40);
+            pasajero.setCenterY(70);
+            pane.getChildren().add(pasajero);
+        }
+
+        pane.getChildren().addAll(area, texto);
+
+        return pane;
+    }
+
+    private Pane crearAreaManejoEquipaje() {
+        Pane pane = new Pane();
+        pane.setPadding(new Insets(10));
+        Rectangle area = new Rectangle(500, 150, Color.BEIGE);
+        Text texto = new Text("Manejo de Equipaje");
+        texto.setFont(new Font("Arial", 20));
+        texto.setX(20);
+        texto.setY(35);
+        Rectangle cinta = new Rectangle(480, 30, Color.DARKGRAY);
+        cinta.setX(10);
+        cinta.setY(60);
+
+        Circle operador = new Circle(15, Color.GREEN);
+        operador.setCenterX(30);
+        operador.setCenterY(120);
+
+        pane.getChildren().addAll(area, texto, cinta, operador);
+
+        return pane;
+    }
+
+    private Pane crearZonaEspera() {
+        Pane pane = new Pane();
+        pane.setPadding(new Insets(10));
+        Rectangle area = new Rectangle(500, 150, Color.LIGHTGREEN);
+        Text texto = new Text("Zona de Espera");
+        texto.setFont(new Font("Arial", 20));
+        texto.setX(20);
+        texto.setY(35);
+
+        for (int i = 0; i < 5; i++) {
+            Circle pasajero = new Circle(15, Color.BLUE);
+            pasajero.setCenterX(100 + i * 40);
+            pasajero.setCenterY(100);
+            pane.getChildren().add(pasajero);
+        }
+
+        pane.getChildren().addAll(area, texto);
+
+        return pane;
     }
 }

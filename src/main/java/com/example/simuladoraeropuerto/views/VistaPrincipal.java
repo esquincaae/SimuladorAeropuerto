@@ -1,5 +1,7 @@
 package com.example.simuladoraeropuerto.views;
 
+import com.example.simuladoraeropuerto.models.AgenteControl;
+import com.example.simuladoraeropuerto.models.OperadorEquipaje;
 import com.example.simuladoraeropuerto.models.Pasajero;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -71,10 +73,21 @@ public class VistaPrincipal {
         texto.setFont(new Font("Arial", 20));
         texto.setX(20);
         texto.setY(35);
+
         pane.getChildren().addAll(area, texto);
+
+        // Creación de los agentes
+        for (int i = 0; i < 10; i++) {
+            AgenteControl agente = new AgenteControl();
+            Circle visualRepresentation = agente.getVisualRepresentation();
+            visualRepresentation.setCenterX(50 + i * 45); // Posicionamiento horizontal
+            visualRepresentation.setCenterY(75); // Posición vertical
+            pane.getChildren().add(visualRepresentation);
+        }
 
         return pane;
     }
+
 
     private Pane crearAreaManejoEquipaje() {
         Pane pane = new Pane();
@@ -90,8 +103,18 @@ public class VistaPrincipal {
 
         pane.getChildren().addAll(area, texto, cinta);
 
+        // Creación de los operadores de equipaje
+        for (int i = 0; i < 5; i++) { // Número de operadores
+            OperadorEquipaje operador = new OperadorEquipaje();
+            Circle visualRepresentation = operador.getVisualRepresentation();
+            visualRepresentation.setCenterX(50 + i * 90); // Posicionamiento horizontal
+            visualRepresentation.setCenterY(120); // Posición vertical
+            pane.getChildren().add(visualRepresentation);
+        }
+
         return pane;
     }
+
 
     private Pane crearZonaEspera() {
         Pane pane = new Pane();

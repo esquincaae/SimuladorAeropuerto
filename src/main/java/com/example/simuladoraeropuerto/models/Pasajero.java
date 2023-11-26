@@ -11,6 +11,8 @@ public class Pasajero extends Thread {
     private final int x, y;
     private Circle pasajeroVisual;
 
+    private Circle equipajeVisual; // Representación visual del equipaje
+
     public Pasajero(VistaPrincipal vista, ControlPasaportes control, int x, int y) {
         this.vista = vista;
         this.controlPasaportes = control;
@@ -19,21 +21,31 @@ public class Pasajero extends Thread {
         this.pasajeroVisual = new Circle(10, Color.RED);
         this.pasajeroVisual.setCenterX(x);
         this.pasajeroVisual.setCenterY(y);
+        this.equipajeVisual = new Circle(5, Color.SADDLEBROWN); // Equipaje más pequeño y de color café
+        this.equipajeVisual.setCenterX(x + 15); // Posicionamiento inicial del equipaje al lado del pasajero
+        this.equipajeVisual.setCenterY(y);
     }
 
     @Override
     public void run() {
-        vista.agregarPasajeroAlAreaEntrada(pasajeroVisual);
+        vista.agregarPasajeroAlAreaEntrada(pasajeroVisual, equipajeVisual);
         controlPasaportes.atenderPasajero(this);
     }
-
+    // Método para remover el equipaje de la vista
+    public void removerEquipaje() {
+        Platform.runLater(() -> {
+            // Remover el equipaje visual de la vista principal
+            vista.removerEquipaje(equipajeVisual);
+        });
+    }
     public void moverALaCola() {
         Platform.runLater(() -> {
-            // Supongamos que la cola empieza en (x=550, y=50) y cada nuevo pasajero se pone detrás del anterior
             pasajeroVisual.setCenterX(550);
             pasajeroVisual.setCenterY(50 + vista.getNumeroEnCola() * 20);
+            equipajeVisual.setCenterX(550 + 15); // Mover el equipaje junto con el pasajero
+            equipajeVisual.setCenterY(50 + vista.getNumeroEnCola() * 20);
         });
-        vista.incrementarNumeroEnCola(); // Aumentar el contador de pasajeros en la cola
+        vista.incrementarNumeroEnCola();
     }
 
 }

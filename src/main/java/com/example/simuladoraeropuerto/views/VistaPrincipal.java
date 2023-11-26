@@ -51,9 +51,11 @@ public class VistaPrincipal {
         return root;
     }
 
-    public void agregarPasajeroAlAreaEntrada(Circle pasajero) {
+    public void agregarPasajeroAlAreaEntrada(Circle pasajero, Circle equipaje) {
         if (pasajerosEnAreaEntrada < MAX_PASAJEROS_AREA_ENTRADA) {
-            Platform.runLater(() -> areaEntrada.getChildren().add(pasajero));
+            Platform.runLater(() -> {
+                areaEntrada.getChildren().addAll(pasajero, equipaje);
+            });
             pasajerosEnAreaEntrada++;
         } else {
             listaEspera.add(pasajero); // Agregamos el pasajero a la lista de espera
@@ -80,6 +82,11 @@ public class VistaPrincipal {
         return pane;
     }
 
+    public void removerEquipaje(Circle equipaje) {
+        Platform.runLater(() -> {
+            areaEntrada.getChildren().remove(equipaje);
+        });
+    }
     private Pane crearAreaControlPasaportes() {
         Pane pane = new Pane();
         pane.setPadding(new Insets(10));

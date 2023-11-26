@@ -10,4 +10,3 @@ public class MainController {
         // Aquí se pueden añadir más elementos de control
     }
 }
-

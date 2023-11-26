@@ -5,6 +5,10 @@ import javafx.application.Platform;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 public class Pasajero extends Thread {
     private final VistaPrincipal vista;
     private final ControlPasaportes controlPasaportes;
@@ -12,6 +16,18 @@ public class Pasajero extends Thread {
     private Circle pasajeroVisual;
 
     private Circle equipajeVisual; // Representación visual del equipaje
+
+    private final Lock lock = new ReentrantLock();
+    private final Condition atendido = lock.newCondition();
+    private boolean haSidoAtendido = false;
+
+    @Override
+    public void run() {
+        vista.agregarPasajeroAlAreaEntrada(pasajeroVisual, equipajeVisual);
+        controlPasaportes.atenderPasajero(this);
+        esperarAtencion();
+        // Proceder con la lógica después de ser atendido
+    }
 
     public Pasajero(VistaPrincipal vista, ControlPasaportes control, int x, int y) {
         this.vista = vista;
@@ -26,17 +42,36 @@ public class Pasajero extends Thread {
         this.equipajeVisual.setCenterY(y);
     }
 
-    @Override
-    public void run() {
-        vista.agregarPasajeroAlAreaEntrada(pasajeroVisual, equipajeVisual);
-        controlPasaportes.atenderPasajero(this);
-    }
+
     // Método para remover el equipaje de la vista
     public void removerEquipaje() {
         Platform.runLater(() -> {
             // Remover el equipaje visual de la vista principal
             vista.removerEquipaje(equipajeVisual);
         });
+    }
+
+    public void esperarAtencion() {
+        lock.lock();
+        try {
+            while (!haSidoAtendido) {
+                atendido.await();
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public void atencionCompletada() {
+        lock.lock();
+        try {
+            haSidoAtendido = true;
+            atendido.signal();
+        } finally {
+            lock.unlock();
+        }
     }
     public void moverALaCola() {
         Platform.runLater(() -> {

@@ -3,17 +3,59 @@ package com.example.simuladoraeropuerto.models;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 
-public class AgenteControl {
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+public class AgenteControl extends Thread {
     private Circle visualRepresentation;
+    private Pasajero pasajeroActual;
+    private final Lock lock = new ReentrantLock();
+    private final Condition disponible = lock.newCondition();
+    private boolean libre = true;
 
     public AgenteControl() {
-        // Crear la representación visual del agente
-        visualRepresentation = new Circle(15, Color.BLUE); // Color azul para los agentes
+        visualRepresentation = new Circle(15, Color.BLUE);
+        this.start();
     }
 
     public Circle getVisualRepresentation() {
         return visualRepresentation;
     }
 
-    // Métodos adicionales pueden ser añadidos aquí en el futuro
+    public void atenderPasajero(Pasajero pasajero) {
+        lock.lock();
+        try {
+            while (!libre) {
+                disponible.await();
+            }
+            this.pasajeroActual = pasajero;
+            libre = false;
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public void run() {
+        while (true) {
+            lock.lock();
+            try {
+                while (pasajeroActual == null) {
+                    disponible.await();
+                }
+                // Simular atención al pasajero
+                Thread.sleep(1000);
+                pasajeroActual.atencionCompletada();
+                pasajeroActual = null;
+                libre = true;
+                disponible.signalAll();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } finally {
+                lock.unlock();
+            }
+        }
+    }
 }

@@ -25,7 +25,6 @@ public class VistaPrincipal {
         return root;
     }
 
-
     private Pane crearAreaControlPasaportes() {
         Pane pane = new Pane();
         pane.setPadding(new Insets(10));
@@ -36,17 +35,7 @@ public class VistaPrincipal {
         texto.setY(35);
         pane.getChildren().addAll(area, texto);
 
-        for (int i = 0; i < 10; i++) {
-            Rectangle cabina = new Rectangle(30, 30, Color.GRAY);
-            cabina.setX(40 + i * 45);
-            cabina.setY(60);
-            pane.getChildren().add(cabina);
-
-            Circle agente = new Circle(15, Color.RED);
-            agente.setCenterX(55 + i * 45);
-            agente.setCenterY(110);
-            pane.getChildren().add(agente);
-        }
+        // Los círculos que representaban a los agentes han sido removidos
 
         return pane;
     }
@@ -59,14 +48,6 @@ public class VistaPrincipal {
         texto.setFont(new Font("Arial", 20));
         texto.setX(20);
         texto.setY(35);
-
-        // Representación visual de los pasajeros llegando
-        for (int i = 0; i < 5; i++) {
-            Circle pasajero = new Circle(15, Color.BLUE);
-            pasajero.setCenterX(100 + i * 40);
-            pasajero.setCenterY(70);
-            pane.getChildren().add(pasajero);
-        }
 
         pane.getChildren().addAll(area, texto);
 
@@ -85,11 +66,7 @@ public class VistaPrincipal {
         cinta.setX(10);
         cinta.setY(60);
 
-        Circle operador = new Circle(15, Color.GREEN);
-        operador.setCenterX(30);
-        operador.setCenterY(120);
-
-        pane.getChildren().addAll(area, texto, cinta, operador);
+        pane.getChildren().addAll(area, texto, cinta);
 
         return pane;
     }
@@ -102,13 +79,6 @@ public class VistaPrincipal {
         texto.setFont(new Font("Arial", 20));
         texto.setX(20);
         texto.setY(35);
-
-        for (int i = 0; i < 5; i++) {
-            Circle pasajero = new Circle(15, Color.BLUE);
-            pasajero.setCenterX(100 + i * 40);
-            pasajero.setCenterY(100);
-            pane.getChildren().add(pasajero);
-        }
 
         pane.getChildren().addAll(area, texto);
 

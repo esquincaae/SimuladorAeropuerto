@@ -1,6 +1,7 @@
 package com.example.simuladoraeropuerto.views;
 
 import com.example.simuladoraeropuerto.models.AgenteControl;
+import com.example.simuladoraeropuerto.models.ControlPasaportes;
 import com.example.simuladoraeropuerto.models.OperadorEquipaje;
 import com.example.simuladoraeropuerto.models.Pasajero;
 import javafx.application.Platform;
@@ -16,11 +17,25 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 public class VistaPrincipal {
+
+    private ControlPasaportes controlPasaportes;
     private Pane areaEntrada;
     private int pasajerosEnAreaEntrada = 0;
     private final int MAX_PASAJEROS_AREA_ENTRADA = 10;
     private Queue<Circle> listaEspera = new LinkedList<>();
 
+    private int numeroEnCola = 0; // Contador para los pasajeros en la cola
+
+    public synchronized int getNumeroEnCola() {
+        return numeroEnCola;
+    }
+
+    public synchronized void incrementarNumeroEnCola() {
+        numeroEnCola++;
+    }
+    public VistaPrincipal() {
+        this.controlPasaportes = new ControlPasaportes(10); // 10 cabinas disponibles
+    }
     public Pane crearContenido() {
         VBox root = new VBox(20);
         root.setPadding(new Insets(20));
@@ -115,7 +130,22 @@ public class VistaPrincipal {
         return pane;
     }
 
-
+    private void iniciarSimulacion() {
+        new Thread(() -> {
+            while (true) {
+                Platform.runLater(() -> {
+                    int[] posicion = obtenerPosicionLibre();
+                    Pasajero pasajero = new Pasajero(this, controlPasaportes, posicion[0], posicion[1]);
+                    pasajero.start();
+                });
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
     private Pane crearZonaEspera() {
         Pane pane = new Pane();
         pane.setPadding(new Insets(10));

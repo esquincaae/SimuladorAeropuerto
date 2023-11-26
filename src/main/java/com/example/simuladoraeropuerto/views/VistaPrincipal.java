@@ -1,5 +1,7 @@
 package com.example.simuladoraeropuerto.views;
 
+import com.example.simuladoraeropuerto.models.Pasajero;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Circle;
@@ -8,14 +10,21 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
+import java.util.LinkedList;
+import java.util.Queue;
+
 public class VistaPrincipal {
+    private Pane areaEntrada;
+    private int pasajerosEnAreaEntrada = 0;
+    private final int MAX_PASAJEROS_AREA_ENTRADA = 10;
+    private Queue<Circle> listaEspera = new LinkedList<>();
 
     public Pane crearContenido() {
         VBox root = new VBox(20);
         root.setPadding(new Insets(20));
         root.setStyle("-fx-background-color: #F0F0F0;");
 
-        Pane areaEntrada = crearAreaEntrada();
+        areaEntrada = crearAreaEntrada();
         Pane areaControlPasaportes = crearAreaControlPasaportes();
         Pane areaManejoEquipaje = crearAreaManejoEquipaje();
         Pane zonaEspera = crearZonaEspera();
@@ -25,19 +34,19 @@ public class VistaPrincipal {
         return root;
     }
 
-    private Pane crearAreaControlPasaportes() {
-        Pane pane = new Pane();
-        pane.setPadding(new Insets(10));
-        Rectangle area = new Rectangle(500, 150, Color.LIGHTBLUE);
-        Text texto = new Text("Control de Pasaportes");
-        texto.setFont(new Font("Arial", 20));
-        texto.setX(20);
-        texto.setY(35);
-        pane.getChildren().addAll(area, texto);
+    public void agregarPasajeroAlAreaEntrada(Circle pasajero) {
+        if (pasajerosEnAreaEntrada < MAX_PASAJEROS_AREA_ENTRADA) {
+            Platform.runLater(() -> areaEntrada.getChildren().add(pasajero));
+            pasajerosEnAreaEntrada++;
+        } else {
+            listaEspera.add(pasajero); // Agregamos el pasajero a la lista de espera
+        }
+    }
 
-        // Los círculos que representaban a los agentes han sido removidos
-
-        return pane;
+    public int[] obtenerPosicionLibre() {
+        int x = 20 + (pasajerosEnAreaEntrada % 5) * 30; // Espacio horizontal entre pasajeros
+        int y = 50 + (pasajerosEnAreaEntrada / 5) * 30; // Espacio vertical entre pasajeros
+        return new int[]{x, y};
     }
 
     private Pane crearAreaEntrada() {
@@ -49,6 +58,19 @@ public class VistaPrincipal {
         texto.setX(20);
         texto.setY(35);
 
+        pane.getChildren().addAll(area, texto);
+
+        return pane;
+    }
+
+    private Pane crearAreaControlPasaportes() {
+        Pane pane = new Pane();
+        pane.setPadding(new Insets(10));
+        Rectangle area = new Rectangle(500, 150, Color.LIGHTBLUE);
+        Text texto = new Text("Control de Pasaportes");
+        texto.setFont(new Font("Arial", 20));
+        texto.setX(20);
+        texto.setY(35);
         pane.getChildren().addAll(area, texto);
 
         return pane;

@@ -20,13 +20,14 @@ public class Pasajero extends Thread {
     private final Lock lock = new ReentrantLock();
     private final Condition atendido = lock.newCondition();
     private boolean haSidoAtendido = false;
+    private Equipaje equipaje;
 
     @Override
     public void run() {
         vista.agregarPasajeroAlAreaEntrada(pasajeroVisual, equipajeVisual);
         controlPasaportes.atenderPasajero(this);
         esperarAtencion();
-        // Proceder con la lógica después de ser atendido
+        vista.entregarEquipaje(this, this.equipaje);
     }
 
     public Pasajero(VistaPrincipal vista, ControlPasaportes control, int x, int y) {
@@ -40,6 +41,7 @@ public class Pasajero extends Thread {
         this.equipajeVisual = new Circle(5, Color.SADDLEBROWN); // Equipaje más pequeño y de color café
         this.equipajeVisual.setCenterX(x + 15); // Posicionamiento inicial del equipaje al lado del pasajero
         this.equipajeVisual.setCenterY(y);
+        this.equipaje = new Equipaje();
     }
 
 

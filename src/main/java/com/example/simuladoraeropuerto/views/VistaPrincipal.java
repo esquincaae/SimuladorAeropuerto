@@ -1,9 +1,6 @@
 package com.example.simuladoraeropuerto.views;
 
-import com.example.simuladoraeropuerto.models.AgenteControl;
-import com.example.simuladoraeropuerto.models.ControlPasaportes;
-import com.example.simuladoraeropuerto.models.OperadorEquipaje;
-import com.example.simuladoraeropuerto.models.Pasajero;
+import com.example.simuladoraeropuerto.models.*;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.layout.*;
@@ -13,7 +10,9 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 
 public class VistaPrincipal {
@@ -23,18 +22,22 @@ public class VistaPrincipal {
     private int pasajerosEnAreaEntrada = 0;
     private final int MAX_PASAJEROS_AREA_ENTRADA = 10;
     private Queue<Circle> listaEspera = new LinkedList<>();
-
+    private List<OperadorEquipaje> operadoresEquipaje;
     private int numeroEnCola = 0; // Contador para los pasajeros en la cola
 
     public synchronized int getNumeroEnCola() {
         return numeroEnCola;
     }
-
+    private static final int NUMERO_OPERADORES = 5; // Ajusta el número según sea necesario
     public synchronized void incrementarNumeroEnCola() {
         numeroEnCola++;
     }
     public VistaPrincipal() {
         this.controlPasaportes = new ControlPasaportes(10); // 10 cabinas disponibles
+        operadoresEquipaje = new ArrayList<>();
+        for (int i = 0; i < NUMERO_OPERADORES; i++) {
+            operadoresEquipaje.add(new OperadorEquipaje());
+        }
     }
     public Pane crearContenido() {
         VBox root = new VBox(20);
@@ -50,6 +53,7 @@ public class VistaPrincipal {
 
         return root;
     }
+
 
     public void agregarPasajeroAlAreaEntrada(Circle pasajero, Circle equipaje) {
         if (pasajerosEnAreaEntrada < MAX_PASAJEROS_AREA_ENTRADA) {
@@ -109,7 +113,14 @@ public class VistaPrincipal {
 
         return pane;
     }
-
+    public synchronized void entregarEquipaje(Pasajero pasajero, Equipaje equipaje) {
+        for (OperadorEquipaje operador : operadoresEquipaje) {
+            if (operador.estaLibre()) {
+                operador.procesarEquipaje(equipaje);
+                break;
+            }
+        }
+    }
 
     private Pane crearAreaManejoEquipaje() {
         Pane pane = new Pane();
@@ -166,4 +177,5 @@ public class VistaPrincipal {
 
         return pane;
     }
+
 }

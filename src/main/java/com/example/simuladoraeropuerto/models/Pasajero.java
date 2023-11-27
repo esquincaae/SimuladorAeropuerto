@@ -30,6 +30,9 @@ public class Pasajero extends Thread {
         vista.entregarEquipaje(this, this.equipaje);
     }
 
+    public Circle getVisualRepresentation() {
+        return pasajeroVisual;
+    }
     public Pasajero(VistaPrincipal vista, ControlPasaportes control, int x, int y) {
         this.vista = vista;
         this.controlPasaportes = control;
@@ -53,6 +56,15 @@ public class Pasajero extends Thread {
         });
     }
 
+
+
+    public void salirDeLaCola() {
+        Platform.runLater(() -> {
+            // Actualizar la posición visual del pasajero al salir de la cola
+            vista.removerPasajeroDeCola(this);
+        });
+        vista.decrementarNumeroEnCola();
+    }
     public void esperarAtencion() {
         lock.lock();
         try {
@@ -84,5 +96,6 @@ public class Pasajero extends Thread {
         });
         vista.incrementarNumeroEnCola();
     }
+
 
 }

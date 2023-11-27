@@ -24,6 +24,14 @@ public class VistaPrincipal {
     private Queue<Circle> listaEspera = new LinkedList<>();
     private List<OperadorEquipaje> operadoresEquipaje;
     private int numeroEnCola = 0; // Contador para los pasajeros en la cola
+    private Pane areaCola; // Área para mostrar la cola de pasajeros
+    private List<Circle> colaPasajeros; // Lista para mantener los círculos de los pasajeros en la cola
+
+    public synchronized void decrementarNumeroEnCola() {
+        if (numeroEnCola > 0) {
+            numeroEnCola--;
+        }
+    }
 
     public synchronized int getNumeroEnCola() {
         return numeroEnCola;
@@ -33,12 +41,23 @@ public class VistaPrincipal {
         numeroEnCola++;
     }
     public VistaPrincipal() {
+        colaPasajeros = new ArrayList<>();
+        areaCola = crearAreaCola(); // Crear área de cola
         this.controlPasaportes = new ControlPasaportes(10); // 10 cabinas disponibles
         operadoresEquipaje = new ArrayList<>();
         for (int i = 0; i < NUMERO_OPERADORES; i++) {
             operadoresEquipaje.add(new OperadorEquipaje());
         }
     }
+
+    private Pane crearAreaCola() {
+        Pane colaPane = new Pane();
+        colaPane.setPrefSize(500, 100); // Ajustar tamaño según sea necesario
+        colaPane.setStyle("-fx-background-color: lightgray;"); // Estilo visual de la cola
+        // Posicionar y diseñar la cola según se necesite
+        return colaPane;
+    }
+
     public Pane crearContenido() {
         VBox root = new VBox(20);
         root.setPadding(new Insets(20));
@@ -49,11 +68,37 @@ public class VistaPrincipal {
         Pane areaManejoEquipaje = crearAreaManejoEquipaje();
         Pane zonaEspera = crearZonaEspera();
 
-        root.getChildren().addAll(areaEntrada, areaControlPasaportes, areaManejoEquipaje, zonaEspera);
-
+        root.getChildren().addAll(areaEntrada, areaControlPasaportes, areaManejoEquipaje, areaCola, zonaEspera);
         return root;
     }
 
+    public synchronized void agregarPasajeroACola(Pasajero pasajero) {
+        Platform.runLater(() -> {
+            Circle visualPasajero = pasajero.getVisualRepresentation();
+            // Calcular posición en la cola basada en numeroEnCola u otro criterio
+            int posicionX = 20 + colaPasajeros.size() * 20; // Ejemplo de cálculo
+            int posicionY = 50; // Posición vertical fija
+
+            visualPasajero.setCenterX(posicionX);
+            visualPasajero.setCenterY(posicionY);
+
+            colaPasajeros.add(visualPasajero);
+            areaCola.getChildren().add(visualPasajero);
+        });
+    }
+
+    public synchronized void removerPasajeroDeCola(Pasajero pasajero) {
+        Platform.runLater(() -> {
+            Circle visualPasajero = pasajero.getVisualRepresentation();
+            colaPasajeros.remove(visualPasajero);
+            areaCola.getChildren().remove(visualPasajero);
+            // Reajustar la cola si es necesario
+            for (int i = 0; i < colaPasajeros.size(); i++) {
+                Circle pasajeroEnCola = colaPasajeros.get(i);
+                pasajeroEnCola.setCenterX(20 + i * 20); // Reajustar posiciones
+            }
+        });
+    }
 
     public void agregarPasajeroAlAreaEntrada(Circle pasajero, Circle equipaje) {
         if (pasajerosEnAreaEntrada < MAX_PASAJEROS_AREA_ENTRADA) {

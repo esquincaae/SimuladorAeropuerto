@@ -20,6 +20,8 @@ public class VistaPrincipal {
     private ControlPasaportes controlPasaportes;
     private Pane areaEntrada;
     private int pasajerosEnAreaEntrada = 0;
+
+    private AgenteControl[] agentes; // Declaración de la variable 'agentes
     private final int MAX_PASAJEROS_AREA_ENTRADA = 10;
     private Queue<Circle> listaEspera = new LinkedList<>();
     private List<OperadorEquipaje> operadoresEquipaje;
@@ -42,22 +44,67 @@ public class VistaPrincipal {
     }
     public VistaPrincipal() {
         colaPasajeros = new ArrayList<>();
-        areaCola = crearAreaCola(); // Crear área de cola
-        this.controlPasaportes = new ControlPasaportes(10); // 10 cabinas disponibles
+        areaCola = crearAreaCola();
+        areaEntrada = crearAreaEntrada();
+
+        agentes = new AgenteControl[10];
+        for (int i = 0; i < agentes.length; i++) {
+            agentes[i] = new AgenteControl();
+        }
+        this.controlPasaportes = new ControlPasaportes(10, agentes);
+
         operadoresEquipaje = new ArrayList<>();
         for (int i = 0; i < NUMERO_OPERADORES; i++) {
-            operadoresEquipaje.add(new OperadorEquipaje());
+            operadoresEquipaje.add(new OperadorEquipaje(this));
         }
     }
 
+    private Pane crearAreaControlPasaportes() {
+        Pane pane = new Pane();
+        pane.setPadding(new Insets(10));
+        Rectangle area = new Rectangle(500, 150, Color.LIGHTBLUE);
+        Text texto = new Text("Control de Pasaportes");
+        texto.setFont(new Font("Arial", 20));
+        texto.setX(20);
+        texto.setY(35);
+        pane.getChildren().addAll(area, texto);
+
+        for (int i = 0; i < agentes.length; i++) {
+            Circle visual = agentes[i].getVisualRepresentation();
+            visual.setCenterX(50 + i * 45);
+            visual.setCenterY(75);
+            pane.getChildren().add(visual);
+        }
+
+        return pane;
+    }
+    public void iniciarProcesamientoEquipaje(Equipaje equipaje) {
+        Platform.runLater(() -> {
+            Circle visualEquipaje = equipaje.getVisualRepresentation();
+            // Asumiendo que tienes valores definidos para las posiciones
+            visualEquipaje.setCenterX(300); // Ejemplo: posición X de procesamiento
+            visualEquipaje.setCenterY(200); // Ejemplo: posición Y de procesamiento
+        });
+    }
+    // Método para finalizar el procesamiento visual del equipaje
+    public void terminarProcesamientoEquipaje(Equipaje equipaje) {
+        Platform.runLater(() -> {
+            Circle visualEquipaje = equipaje.getVisualRepresentation();
+            // Mover el equipaje a la cinta transportadora
+            visualEquipaje.setCenterX(200); // Ajusta según la ubicación de tu cinta transportadora
+            visualEquipaje.setCenterY(80);  // Ajusta según la ubicación de tu cinta transportadora
+        });
+        }
+
     private Pane crearAreaCola() {
         Pane colaPane = new Pane();
-        colaPane.setPrefSize(500, 100); // Ajustar tamaño según sea necesario
-        colaPane.setStyle("-fx-background-color: lightgray;"); // Estilo visual de la cola
-        // Posicionar y diseñar la cola según se necesite
+        colaPane.setPrefSize(500, 100);
+        colaPane.setStyle("-fx-background-color: lightgray;");
         return colaPane;
     }
-
+    public AgenteControl[] getAgentes() {
+        return agentes;
+    }
     public Pane crearContenido() {
         VBox root = new VBox(20);
         root.setPadding(new Insets(20));
@@ -127,7 +174,6 @@ public class VistaPrincipal {
         texto.setY(35);
 
         pane.getChildren().addAll(area, texto);
-
         return pane;
     }
 
@@ -135,28 +181,6 @@ public class VistaPrincipal {
         Platform.runLater(() -> {
             areaEntrada.getChildren().remove(equipaje);
         });
-    }
-    private Pane crearAreaControlPasaportes() {
-        Pane pane = new Pane();
-        pane.setPadding(new Insets(10));
-        Rectangle area = new Rectangle(500, 150, Color.LIGHTBLUE);
-        Text texto = new Text("Control de Pasaportes");
-        texto.setFont(new Font("Arial", 20));
-        texto.setX(20);
-        texto.setY(35);
-
-        pane.getChildren().addAll(area, texto);
-
-        // Creación de los agentes
-        for (int i = 0; i < 10; i++) {
-            AgenteControl agente = new AgenteControl();
-            Circle visualRepresentation = agente.getVisualRepresentation();
-            visualRepresentation.setCenterX(50 + i * 45); // Posicionamiento horizontal
-            visualRepresentation.setCenterY(75); // Posición vertical
-            pane.getChildren().add(visualRepresentation);
-        }
-
-        return pane;
     }
     public synchronized void entregarEquipaje(Pasajero pasajero, Equipaje equipaje) {
         for (OperadorEquipaje operador : operadoresEquipaje) {
@@ -182,8 +206,8 @@ public class VistaPrincipal {
         pane.getChildren().addAll(area, texto, cinta);
 
         // Creación de los operadores de equipaje
-        for (int i = 0; i < 5; i++) { // Número de operadores
-            OperadorEquipaje operador = new OperadorEquipaje();
+        for (int i = 0; i < NUMERO_OPERADORES; i++) {
+            OperadorEquipaje operador = operadoresEquipaje.get(i);
             Circle visualRepresentation = operador.getVisualRepresentation();
             visualRepresentation.setCenterX(50 + i * 90); // Posicionamiento horizontal
             visualRepresentation.setCenterY(120); // Posición vertical
@@ -192,6 +216,7 @@ public class VistaPrincipal {
 
         return pane;
     }
+
 
     private void iniciarSimulacion() {
         new Thread(() -> {

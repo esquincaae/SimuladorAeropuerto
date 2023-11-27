@@ -4,23 +4,29 @@ import java.util.concurrent.Semaphore;
 
 public class ControlPasaportes {
     private final Semaphore cabinasDisponibles;
+    private AgenteControl[] agentes; // Array de agentes de control de pasaportes
 
-    public ControlPasaportes(int numeroCabinas) {
+    public ControlPasaportes(int numeroCabinas, AgenteControl[] agentes) {
         this.cabinasDisponibles = new Semaphore(numeroCabinas);
+        this.agentes = agentes;
     }
 
     public void atenderPasajero(Pasajero pasajero) {
         try {
             if (!cabinasDisponibles.tryAcquire()) {
-                pasajero.moverALaCola(); // Mover al pasajero a la cola de espera
-                cabinasDisponibles.acquire(); // Esperar por una cabina disponible
+                pasajero.moverALaCola();
+                cabinasDisponibles.acquire();
             }
-            // Procesar el pasaporte del pasajero
-            Thread.sleep(1000); // Simular tiempo de atención
+
+            // Asignar el pasajero a un agente libre
+            for (AgenteControl agente : agentes) {
+                if (agente.estaLibre()) {
+                    agente.atenderPasajero(pasajero);
+                    break;
+                }
+            }
         } catch (InterruptedException e) {
             e.printStackTrace();
-        } finally {
-            cabinasDisponibles.release(); // Liberar la cabina
         }
     }
 }

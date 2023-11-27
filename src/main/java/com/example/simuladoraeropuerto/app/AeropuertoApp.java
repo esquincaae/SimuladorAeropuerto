@@ -1,5 +1,6 @@
 package com.example.simuladoraeropuerto.app;
 
+import com.example.simuladoraeropuerto.models.AgenteControl;
 import com.example.simuladoraeropuerto.models.Pasajero;
 import com.example.simuladoraeropuerto.models.ControlPasaportes;
 import com.example.simuladoraeropuerto.views.VistaPrincipal;
@@ -12,10 +13,10 @@ public class AeropuertoApp extends Application {
     private VistaPrincipal vistaPrincipal;
     private ControlPasaportes controlPasaportes;
 
-    @Override
     public void start(Stage primaryStage) {
         vistaPrincipal = new VistaPrincipal();
-        controlPasaportes = new ControlPasaportes(10); // 10 cabinas de control de pasaportes
+        AgenteControl[] agentes = vistaPrincipal.getAgentes();
+        controlPasaportes = new ControlPasaportes(10, agentes); // Ahora pasando los agentes
         Scene scene = new Scene(vistaPrincipal.crearContenido(), 600, 600);
 
         primaryStage.setTitle("Simulación de Aeropuerto");

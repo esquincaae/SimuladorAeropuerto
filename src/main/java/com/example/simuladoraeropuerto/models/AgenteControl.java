@@ -19,6 +19,9 @@ public class AgenteControl extends Thread {
         this.start();
     }
 
+    public boolean estaLibre() {
+        return libre;
+    }
     public Circle getVisualRepresentation() {
         return visualRepresentation;
     }

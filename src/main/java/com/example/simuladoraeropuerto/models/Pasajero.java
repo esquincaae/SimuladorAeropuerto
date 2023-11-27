@@ -41,14 +41,24 @@ public class Pasajero extends Thread {
         vista.agregarPasajeroAlAreaEntrada(pasajeroVisual, equipajeVisual);
 
         try {
-            Thread.sleep(new Random().nextInt(4000) + 1000);
+            Thread.sleep(new Random().nextInt(4000) + 1000); // Tiempo antes de que el pasajero se mueva al control de pasaportes
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
         AgenteControl agenteLibre = encontrarAgenteLibre();
         if (agenteLibre != null) {
+            // Mueve el pasajero y su equipaje a la posición del agente
             moverPasajeroYEquipaje(agenteLibre);
+
+            // Mover al agente a la posición del pasajero en la zona de control de pasaportes
+            Platform.runLater(() -> {
+                int posX = (int) pasajeroVisual.getCenterX();
+                int posY = (int) pasajeroVisual.getCenterY();
+                vista.moverAgenteAEspacioDeTrabajo(agenteLibre, posX, posY);
+            });
+
+            agenteLibre.atenderPasajero(this);
         }
 
         controlPasaportes.atenderPasajero(this);
@@ -56,6 +66,7 @@ public class Pasajero extends Thread {
 
         vista.entregarEquipaje(this, this.equipaje);
     }
+
 
     private AgenteControl encontrarAgenteLibre() {
         for (AgenteControl agente : controlPasaportes.getAgentes()) {

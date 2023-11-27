@@ -67,6 +67,7 @@ public class VistaPrincipal {
         });
     }
 
+
     public synchronized void moverAgenteAZonaEspera(AgenteControl agente, int posX, int posY) {
         Platform.runLater(() -> {
             Circle visual = agente.getVisualRepresentation();
@@ -80,6 +81,7 @@ public class VistaPrincipal {
         Pane pane = new Pane();
         pane.setPadding(new Insets(10));
         Rectangle area = new Rectangle(500, 150, Color.LIGHTBLUE);
+        area.setOpacity(0.5); // Establecer la opacidad, por ejemplo, a 0.5 para semitransparente
         Text texto = new Text("Control de Pasaportes");
         texto.setFont(new Font("Arial", 20));
         texto.setX(20);

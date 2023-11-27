@@ -5,6 +5,7 @@ import javafx.application.Platform;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 
+import java.util.Random;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -25,8 +26,24 @@ public class Pasajero extends Thread {
     @Override
     public void run() {
         vista.agregarPasajeroAlAreaEntrada(pasajeroVisual, equipajeVisual);
+
+        try {
+            // Espera aleatoria antes de dirigirse al control de pasaportes
+            Thread.sleep(new Random().nextInt(4000) + 1000); // Espera de 1 a 5 segundos
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        // Mover visualmente al pasajero hacia el área de control de pasaportes
+        Platform.runLater(() -> {
+            pasajeroVisual.setCenterX(250); // Por ejemplo, en la mitad de la ventana
+            pasajeroVisual.setCenterY(75);  // Posición Y cerca de los agentes
+        });
+
         controlPasaportes.atenderPasajero(this);
-        esperarAtencion();
+        esperarAtencion(); // Espera hasta que la atención esté completa
+
+        // Procesar el equipaje después del control de pasaportes
         vista.entregarEquipaje(this, this.equipaje);
     }
 

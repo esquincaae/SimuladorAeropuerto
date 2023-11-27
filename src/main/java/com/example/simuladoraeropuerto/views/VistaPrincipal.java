@@ -68,19 +68,16 @@ public class VistaPrincipal {
         texto.setX(20);
         texto.setY(35);
 
-        // Añadir primero el rectángulo y el texto
         pane.getChildren().addAll(area, texto);
 
-        // Luego añade los agentes (asegurándote de que se rendericen por encima del rectángulo)
+        // Inicializar los agentes sin asignarles una posición específica aquí
         for (int i = 0; i < agentes.length; i++) {
-            Circle visual = agentes[i].getVisualRepresentation();
-            visual.setCenterX(50 + i * 45);
-            visual.setCenterY(75);
-            pane.getChildren().add(visual);
+            agentes[i] = new AgenteControl();  // Asegúrate de que esta línea está aquí
         }
 
         return pane;
     }
+
 
     public void iniciarProcesamientoEquipaje(Equipaje equipaje) {
         Platform.runLater(() -> {
@@ -249,8 +246,17 @@ public class VistaPrincipal {
 
         pane.getChildren().addAll(area, texto);
 
+        // Añadir los agentes de control a la zona de espera
+        for (int i = 0; i < agentes.length; i++) {
+            Circle visual = agentes[i].getVisualRepresentation();
+            visual.setCenterX(50 + i * 45);  // Ajusta la posición según tu diseño
+            visual.setCenterY(75);           // Ajusta la posición según tu diseño
+            pane.getChildren().add(visual);
+        }
+
         return pane;
     }
+
 
 }
 

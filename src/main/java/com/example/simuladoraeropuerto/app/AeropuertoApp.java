@@ -17,6 +17,7 @@ public class AeropuertoApp extends Application {
         vistaPrincipal = new VistaPrincipal();
         AgenteControl[] agentes = vistaPrincipal.getAgentes();
         controlPasaportes = new ControlPasaportes(10, agentes); // Ahora pasando los agentes
+
         Scene scene = new Scene(vistaPrincipal.crearContenido(), 600, 600);
 
         primaryStage.setTitle("Simulación de Aeropuerto");

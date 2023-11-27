@@ -49,16 +49,19 @@ public class AgenteControl extends Thread {
     private void moverASuZona() {
         if (vistaPrincipal.getNumeroEnCola() > 0) {
             if (!enZonaTrabajo) {
-                vistaPrincipal.moverAgenteAEspacioDeTrabajo(this, 100, 100); // Estos valores deben ajustarse
+                // Coordenadas donde el agente debe estar cuando hay pasajeros en la cola
+                vistaPrincipal.moverAgenteAEspacioDeTrabajo(this, 100, 100);
                 enZonaTrabajo = true;
             }
         } else {
             if (enZonaTrabajo) {
-                vistaPrincipal.moverAgenteAZonaEspera(this, 50, 75); // Estos valores deben ajustarse
+                // Coordenadas de la zona de espera
+                vistaPrincipal.moverAgenteAZonaEspera(this, 50, 75);
                 enZonaTrabajo = false;
             }
         }
     }
+
 
     @Override
     public void run() {

@@ -75,6 +75,7 @@ public class VistaPrincipal {
         });
     }
 
+
     private Pane crearAreaControlPasaportes() {
         Pane pane = new Pane();
         pane.setPadding(new Insets(10));

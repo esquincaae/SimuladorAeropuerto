@@ -15,58 +15,12 @@ public class Pasajero extends Thread {
     private final ControlPasaportes controlPasaportes;
     private final int x, y;
     private Circle pasajeroVisual;
-
     private Circle equipajeVisual; // Representación visual del equipaje
-
     private final Lock lock = new ReentrantLock();
     private final Condition atendido = lock.newCondition();
     private boolean haSidoAtendido = false;
     private Equipaje equipaje;
 
-
-    @Override
-    public void run() {
-        vista.agregarPasajeroAlAreaEntrada(pasajeroVisual, equipajeVisual);
-
-        try {
-            Thread.sleep(new Random().nextInt(4000) + 1000); // Espera aleatoria de 1 a 5 segundos
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        // Encuentra un agente libre y obtén su posición
-        AgenteControl agenteLibre = null;
-        for (AgenteControl agente : controlPasaportes.getAgentes()) {
-            if (agente.estaLibre()) {
-                agenteLibre = agente;
-                break;
-            }
-        }
-
-        // Si se encontró un agente libre, mueve al pasajero y su equipaje frente a él
-        if (agenteLibre != null) {
-            double posXAgente = agenteLibre.getVisualRepresentation().getCenterX();
-            double posYAgente = agenteLibre.getVisualRepresentation().getCenterY();
-
-            Platform.runLater(() -> {
-                pasajeroVisual.setCenterX(posXAgente);
-                pasajeroVisual.setCenterY(posYAgente + 30); // Un poco más abajo del agente
-                equipajeVisual.setCenterX(posXAgente + 15); // Al lado del pasajero
-                equipajeVisual.setCenterY(posYAgente + 30);
-            });
-        }
-
-        controlPasaportes.atenderPasajero(this);
-        esperarAtencion();
-
-        // Procesar el equipaje después del control de pasaportes
-        vista.entregarEquipaje(this, this.equipaje);
-    }
-
-
-    public Circle getVisualRepresentation() {
-        return pasajeroVisual;
-    }
     public Pasajero(VistaPrincipal vista, ControlPasaportes control, int x, int y) {
         this.vista = vista;
         this.controlPasaportes = control;
@@ -75,30 +29,72 @@ public class Pasajero extends Thread {
         this.pasajeroVisual = new Circle(10, Color.RED);
         this.pasajeroVisual.setCenterX(x);
         this.pasajeroVisual.setCenterY(y);
-        this.equipajeVisual = new Circle(5, Color.SADDLEBROWN); // Equipaje más pequeño y de color café
-        this.equipajeVisual.setCenterX(x + 15); // Posicionamiento inicial del equipaje al lado del pasajero
+        this.equipajeVisual = new Circle(5, Color.SADDLEBROWN);
+        this.equipajeVisual.setCenterX(x + 15);
         this.equipajeVisual.setCenterY(y);
         this.equipaje = new Equipaje();
+        this.start();
     }
 
+    @Override
+    public void run() {
+        vista.agregarPasajeroAlAreaEntrada(pasajeroVisual, equipajeVisual);
 
-    // Método para remover el equipaje de la vista
+        try {
+            Thread.sleep(new Random().nextInt(4000) + 1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        AgenteControl agenteLibre = encontrarAgenteLibre();
+        if (agenteLibre != null) {
+            moverPasajeroYEquipaje(agenteLibre);
+        }
+
+        controlPasaportes.atenderPasajero(this);
+        esperarAtencion();
+
+        vista.entregarEquipaje(this, this.equipaje);
+    }
+
+    private AgenteControl encontrarAgenteLibre() {
+        for (AgenteControl agente : controlPasaportes.getAgentes()) {
+            if (agente.estaLibre()) {
+                return agente;
+            }
+        }
+        return null;
+    }
+
+    private void moverPasajeroYEquipaje(AgenteControl agente) {
+        double posXAgente = agente.getVisualRepresentation().getCenterX();
+        double posYAgente = agente.getVisualRepresentation().getCenterY();
+
+        Platform.runLater(() -> {
+            pasajeroVisual.setCenterX(posXAgente);
+            pasajeroVisual.setCenterY(posYAgente + 30);
+            equipajeVisual.setCenterX(posXAgente + 15);
+            equipajeVisual.setCenterY(posYAgente + 30);
+        });
+    }
+
+    public Circle getVisualRepresentation() {
+        return pasajeroVisual;
+    }
+
     public void removerEquipaje() {
         Platform.runLater(() -> {
-            // Remover el equipaje visual de la vista principal
             vista.removerEquipaje(equipajeVisual);
         });
     }
 
-
-
     public void salirDeLaCola() {
         Platform.runLater(() -> {
-            // Actualizar la posición visual del pasajero al salir de la cola
             vista.removerPasajeroDeCola(this);
         });
         vista.decrementarNumeroEnCola();
     }
+
     public void esperarAtencion() {
         lock.lock();
         try {
@@ -121,15 +117,14 @@ public class Pasajero extends Thread {
             lock.unlock();
         }
     }
+
     public void moverALaCola() {
         Platform.runLater(() -> {
             pasajeroVisual.setCenterX(550);
             pasajeroVisual.setCenterY(50 + vista.getNumeroEnCola() * 20);
-            equipajeVisual.setCenterX(550 + 15); // Mover el equipaje junto con el pasajero
+            equipajeVisual.setCenterX(550 + 15);
             equipajeVisual.setCenterY(50 + vista.getNumeroEnCola() * 20);
         });
         vista.incrementarNumeroEnCola();
     }
-
-
 }

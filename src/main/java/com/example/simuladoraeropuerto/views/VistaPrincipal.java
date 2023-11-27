@@ -49,7 +49,7 @@ public class VistaPrincipal {
 
         agentes = new AgenteControl[10];
         for (int i = 0; i < agentes.length; i++) {
-            agentes[i] = new AgenteControl();
+            agentes[i] = new AgenteControl(this); // Pasando 'this' como referencia
         }
         this.controlPasaportes = new ControlPasaportes(10, agentes);
 
@@ -57,6 +57,22 @@ public class VistaPrincipal {
         for (int i = 0; i < NUMERO_OPERADORES; i++) {
             operadoresEquipaje.add(new OperadorEquipaje(this));
         }
+    }
+
+    public synchronized void moverAgenteAEspacioDeTrabajo(AgenteControl agente, int posX, int posY) {
+        Platform.runLater(() -> {
+            Circle visual = agente.getVisualRepresentation();
+            visual.setCenterX(posX);
+            visual.setCenterY(posY);
+        });
+    }
+
+    public synchronized void moverAgenteAZonaEspera(AgenteControl agente, int posX, int posY) {
+        Platform.runLater(() -> {
+            Circle visual = agente.getVisualRepresentation();
+            visual.setCenterX(posX);
+            visual.setCenterY(posY);
+        });
     }
 
     private Pane crearAreaControlPasaportes() {
@@ -70,9 +86,8 @@ public class VistaPrincipal {
 
         pane.getChildren().addAll(area, texto);
 
-        // Inicializar los agentes sin asignarles una posición específica aquí
         for (int i = 0; i < agentes.length; i++) {
-            agentes[i] = new AgenteControl();  // Asegúrate de que esta línea está aquí
+            agentes[i] = new AgenteControl(this); // Crear agente
         }
 
         return pane;

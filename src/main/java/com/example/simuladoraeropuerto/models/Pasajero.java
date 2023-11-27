@@ -23,29 +23,46 @@ public class Pasajero extends Thread {
     private boolean haSidoAtendido = false;
     private Equipaje equipaje;
 
+
     @Override
     public void run() {
         vista.agregarPasajeroAlAreaEntrada(pasajeroVisual, equipajeVisual);
 
         try {
-            // Espera aleatoria antes de dirigirse al control de pasaportes
-            Thread.sleep(new Random().nextInt(4000) + 1000); // Espera de 1 a 5 segundos
+            Thread.sleep(new Random().nextInt(4000) + 1000); // Espera aleatoria de 1 a 5 segundos
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
-        // Mover visualmente al pasajero hacia el área de control de pasaportes
-        Platform.runLater(() -> {
-            pasajeroVisual.setCenterX(250); // Por ejemplo, en la mitad de la ventana
-            pasajeroVisual.setCenterY(75);  // Posición Y cerca de los agentes
-        });
+        // Encuentra un agente libre y obtén su posición
+        AgenteControl agenteLibre = null;
+        for (AgenteControl agente : controlPasaportes.getAgentes()) {
+            if (agente.estaLibre()) {
+                agenteLibre = agente;
+                break;
+            }
+        }
+
+        // Si se encontró un agente libre, mueve al pasajero y su equipaje frente a él
+        if (agenteLibre != null) {
+            double posXAgente = agenteLibre.getVisualRepresentation().getCenterX();
+            double posYAgente = agenteLibre.getVisualRepresentation().getCenterY();
+
+            Platform.runLater(() -> {
+                pasajeroVisual.setCenterX(posXAgente);
+                pasajeroVisual.setCenterY(posYAgente + 30); // Un poco más abajo del agente
+                equipajeVisual.setCenterX(posXAgente + 15); // Al lado del pasajero
+                equipajeVisual.setCenterY(posYAgente + 30);
+            });
+        }
 
         controlPasaportes.atenderPasajero(this);
-        esperarAtencion(); // Espera hasta que la atención esté completa
+        esperarAtencion();
 
         // Procesar el equipaje después del control de pasaportes
         vista.entregarEquipaje(this, this.equipaje);
     }
+
 
     public Circle getVisualRepresentation() {
         return pasajeroVisual;

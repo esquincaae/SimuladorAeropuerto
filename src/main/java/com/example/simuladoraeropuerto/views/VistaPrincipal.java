@@ -67,8 +67,11 @@ public class VistaPrincipal {
         texto.setFont(new Font("Arial", 20));
         texto.setX(20);
         texto.setY(35);
+
+        // Añadir primero el rectángulo y el texto
         pane.getChildren().addAll(area, texto);
 
+        // Luego añade los agentes (asegurándote de que se rendericen por encima del rectángulo)
         for (int i = 0; i < agentes.length; i++) {
             Circle visual = agentes[i].getVisualRepresentation();
             visual.setCenterX(50 + i * 45);
@@ -78,6 +81,7 @@ public class VistaPrincipal {
 
         return pane;
     }
+
     public void iniciarProcesamientoEquipaje(Equipaje equipaje) {
         Platform.runLater(() -> {
             Circle visualEquipaje = equipaje.getVisualRepresentation();
@@ -94,7 +98,7 @@ public class VistaPrincipal {
             visualEquipaje.setCenterX(200); // Ajusta según la ubicación de tu cinta transportadora
             visualEquipaje.setCenterY(80);  // Ajusta según la ubicación de tu cinta transportadora
         });
-        }
+    }
 
     private Pane crearAreaCola() {
         Pane colaPane = new Pane();
@@ -249,3 +253,4 @@ public class VistaPrincipal {
     }
 
 }
+

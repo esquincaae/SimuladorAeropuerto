@@ -29,6 +29,8 @@ public class AeropuertoMonitor {
 
     public static final int MAX_AGENTES = 10;
 
+    private boolean[] posicionesEquipaje;
+
     private Queue<AgentePasaporte> agentesPasaportesDisponibles = new LinkedList<>();
 
     public AeropuertoMonitor(Pane airportArea, Pane controlPasaportesArea, Pane equipajeArea, Pane zonaEspera) {
@@ -36,6 +38,7 @@ public class AeropuertoMonitor {
         this.controlPasaportesArea = controlPasaportesArea;
         this.equipajeArea = equipajeArea;
         this.zonaEspera = zonaEspera;
+        posicionesEquipaje = new boolean[maxPasajeros];
     }
 
     public synchronized void teletransportarAPasaportes(Pasajero pasajero, int posicionEntrada) {
@@ -107,6 +110,21 @@ public class AeropuertoMonitor {
         }
         return -1;
     }
+
+    public synchronized void teletransportarAEquipaje(Pasajero pasajero) {
+        int posicionEquipaje = asignarPosicionLibre(posicionesEquipaje);
+        int xPosition = 50 + posicionEquipaje * 30;
+        int yPosition = 80; // Ajusta según la disposición de tu UI
+
+        pasajero.ModificarRepresentacion(xPosition, yPosition, true);
+        pasajero.ModificarEquipaje(xPosition + 15, yPosition, true);
+
+        Platform.runLater(() -> {
+            controlPasaportesArea.getChildren().removeAll(pasajero.getRepresentacion().getCircle(), pasajero.getEquipaje().getCircle());
+            equipajeArea.getChildren().addAll(pasajero.getRepresentacion().getCircle(), pasajero.getEquipaje().getCircle());
+        });
+    }
+
 
     public synchronized void salirPasajero(Pasajero pasajero) {
         Platform.runLater(() -> {

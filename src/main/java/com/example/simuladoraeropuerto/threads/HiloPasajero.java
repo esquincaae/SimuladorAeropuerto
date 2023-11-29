@@ -50,7 +50,17 @@ public class HiloPasajero extends Observable implements Runnable {
             notifyObservers(pasajero.getEquipaje());
         });
 
-        esperarYTeletransportar(pasajero, posicionEntrada);
+        try {
+            // Primera espera antes de mover al pasajero al área de control de pasaportes
+            Thread.sleep((random.nextInt(5) + 1) * 1000); // Espera de 1 a 5 segundos
+            monitor.teletransportarAPasaportes(pasajero, posicionEntrada);
+
+            // Segunda espera antes de mover al pasajero al área de manejo de equipaje
+            Thread.sleep((random.nextInt(5) + 1) * 1000); // Espera de 1 a 5 segundos
+            monitor.teletransportarAEquipaje(pasajero); // Teletransportar al área de equipaje
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     private void esperarYTeletransportar(Pasajero pasajero, int posicionEntrada) {

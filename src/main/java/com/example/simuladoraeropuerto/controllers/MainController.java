@@ -1,10 +1,9 @@
 package com.example.simuladoraeropuerto.controllers;
 
 import com.example.simuladoraeropuerto.concurrent.AeropuertoMonitor;
-import com.example.simuladoraeropuerto.models.AgentePasaporte;
 import com.example.simuladoraeropuerto.models.Circulo;
-import com.example.simuladoraeropuerto.models.Pasajero;
 import com.example.simuladoraeropuerto.threads.HiloAgentePasaporte;
+import com.example.simuladoraeropuerto.threads.HiloAgenteEquipaje;
 import com.example.simuladoraeropuerto.threads.HiloPasajero;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -20,15 +19,15 @@ public class MainController implements Observer {
     private Pane airportArea; // Área del aeropuerto donde se mostrarán los pasajeros
     @FXML
     private Pane controlPasaportesArea; // Área de control de pasaportes
+    @FXML
+    private Pane equipajeArea; // Área de manejo de equipaje
 
-    private static final int NUMERO_AGENTES = 10; // Número de agentes de pasaporte
     private AeropuertoMonitor monitor;
     private ExecutorService executorService;
-    private AgentePasaporte agentePasaporte;
 
     @FXML
     public void initialize() {
-        monitor = new AeropuertoMonitor(airportArea, controlPasaportesArea);
+        monitor = new AeropuertoMonitor(airportArea, controlPasaportesArea, equipajeArea);
 
         // Inicializar y arrancar el hilo de pasajeros
         HiloPasajero hiloPasajero = new HiloPasajero(monitor);
@@ -37,10 +36,16 @@ public class MainController implements Observer {
         hPasajero.start();
 
         // Inicializar y arrancar el hilo de agentes de pasaporte
-        HiloAgentePasaporte hiloAgente = new HiloAgentePasaporte(monitor);
-        hiloAgente.addObserver(this);
-        Thread hAgente = new Thread(hiloAgente);
-        hAgente.start();
+        HiloAgentePasaporte hiloAgentePasaporte = new HiloAgentePasaporte(monitor);
+        hiloAgentePasaporte.addObserver(this);
+        Thread hAgentePasaporte = new Thread(hiloAgentePasaporte);
+        hAgentePasaporte.start();
+
+        // Inicializar y arrancar el hilo de agentes de equipaje
+        HiloAgenteEquipaje hiloAgenteEquipaje = new HiloAgenteEquipaje(monitor);
+        hiloAgenteEquipaje.addObserver(this);
+        Thread hAgenteEquipaje = new Thread(hiloAgenteEquipaje);
+        hAgenteEquipaje.start();
     }
 
     @Override
@@ -57,10 +62,11 @@ public class MainController implements Observer {
                         airportArea.getChildren().add(c.getCircle());
                     } else if (o instanceof HiloAgentePasaporte) {
                         controlPasaportesArea.getChildren().add(c.getCircle());
+                    } else if (o instanceof HiloAgenteEquipaje) {
+                        equipajeArea.getChildren().add(c.getCircle());
                     }
                 });
             }
         }
     }
 }
-

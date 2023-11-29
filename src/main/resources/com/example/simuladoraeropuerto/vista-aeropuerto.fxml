@@ -15,7 +15,7 @@
         <!-- Aquí puedes añadir más elementos para las cabinas -->
     </AnchorPane>
 
-    <AnchorPane minHeight="150.0" style="-fx-background-color: beige;">
+    <AnchorPane fx:id="equipajeArea" minHeight="150.0" style="-fx-background-color: beige;">
         <Label text="Manejo de Equipaje" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="20.0"/>
         <!-- Elementos para representar la cinta de equipaje -->
     </AnchorPane>

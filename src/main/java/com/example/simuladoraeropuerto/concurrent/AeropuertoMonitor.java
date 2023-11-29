@@ -17,6 +17,10 @@ public class AeropuertoMonitor {
     private int pasajerosActuales = 0;
     private int agentesActuales = 0;
 
+    private boolean[] posicionesEntrada = new boolean[maxPasajeros];
+    private boolean[] posicionesPasaportes = new boolean[maxPasajeros];
+
+
     public static final int MAX_AGENTES_EQUIPAJE = 10;
     private int agentesEquipajeActuales = 0;
 
@@ -29,25 +33,55 @@ public class AeropuertoMonitor {
         this.zonaEspera = zonaEspera;
     }
 
+    public synchronized void teletransportarAPasaportes(Pasajero pasajero, int posicionEntrada) {
+        // Libera la posición en la entrada
+        posicionesEntrada[posicionEntrada] = false;
+        pasajerosActuales--;
+
+        int posicionPasaportes = asignarPosicionLibre(posicionesPasaportes);
+        int xPosition = 50 + posicionPasaportes * 30;
+        int yPosition = 100;
+
+        pasajero.ModificarRepresentacion(xPosition, yPosition, true);
+        pasajero.ModificarEquipaje(xPosition + 15, yPosition, true);
+
+        Platform.runLater(() -> {
+            airportArea.getChildren().removeAll(pasajero.getRepresentacion().getCircle(), pasajero.getEquipaje().getCircle());
+            controlPasaportesArea.getChildren().addAll(pasajero.getRepresentacion().getCircle(), pasajero.getEquipaje().getCircle());
+        });
+    }
 
 
-    public synchronized void entrarPasajero(Pasajero pasajero) {
+    public synchronized int entrarPasajero(Pasajero pasajero) {
         while (pasajerosActuales >= maxPasajeros) {
             try {
-                wait(); // Esperar si la zona está llena
+                wait();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
         }
 
-        // Cálculo y asignación de posición para el pasajero y su equipaje
-        int xPosition = 50 + pasajerosActuales * 30;
+        int posicion = asignarPosicionLibre(posicionesEntrada);
+        int xPosition = 50 + posicion * 30;
         int yPosition = 50;
         pasajero.ModificarRepresentacion(xPosition, yPosition, true);
         pasajero.ModificarEquipaje(xPosition + 15, yPosition, true);
 
         pasajerosActuales++;
+        return posicion; // Retorna la posición asignada
     }
+
+
+    private int asignarPosicionLibre(boolean[] posiciones) {
+        for (int i = 0; i < posiciones.length; i++) {
+            if (!posiciones[i]) {
+                posiciones[i] = true;
+                return i;
+            }
+        }
+        return -1; // No debería ocurrir si se controla correctamente el número de pasajeros
+    }
+
 
     public synchronized void salirPasajero(Pasajero pasajero) {
         Platform.runLater(() -> {

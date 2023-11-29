@@ -5,12 +5,14 @@ import com.example.simuladoraeropuerto.models.Pasajero;
 import javafx.application.Platform;
 
 import java.util.Observable;
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class HiloPasajero extends Observable implements Runnable {
     private final AeropuertoMonitor monitor;
     private ExecutorService executorService;
+    private Random random = new Random();
 
     public HiloPasajero(AeropuertoMonitor monitor) {
         this.monitor = monitor;
@@ -18,31 +20,26 @@ public class HiloPasajero extends Observable implements Runnable {
 
     @Override
     public void run() {
-        while (true) { // Bucle infinito para generar pasajeros
-
+        while (true) {
             executorService = Executors.newCachedThreadPool();
+            executorService.execute(this::rutina);
 
-            // Iniciar la generación de pasajeros automáticamente al cargar el controlador
-            executorService.execute(() -> {
-                rutina();
-            });
-
-            // Aquí puedes agregar un delay para simular tiempo entre llegadas
             try {
-                Thread.sleep(1000); // Ejemplo: 1 segundo entre cada pasajero
+                Thread.sleep(1000);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
         }
     }
 
-    public void rutina(){
+    private void rutina() {
         Pasajero pasajero = new Pasajero();
-        entrar(pasajero);
+        entrarYTeletransportar(pasajero);
     }
 
-    public void entrar(Pasajero pasajero){
-        monitor.entrarPasajero(pasajero);
+
+    private void entrarYTeletransportar(Pasajero pasajero) {
+        int posicionEntrada = monitor.entrarPasajero(pasajero); // Ahora esto captura un int
         Platform.runLater(() -> {
             setChanged();
             notifyObservers(pasajero.getRepresentacion());
@@ -53,5 +50,16 @@ public class HiloPasajero extends Observable implements Runnable {
             notifyObservers(pasajero.getEquipaje());
         });
 
+        esperarYTeletransportar(pasajero, posicionEntrada);
+    }
+
+    private void esperarYTeletransportar(Pasajero pasajero, int posicionEntrada) {
+        try {
+            Thread.sleep((random.nextInt(5) + 1) * 1000); // Espera de 1 a 5 segundos
+            monitor.teletransportarAPasaportes(pasajero, posicionEntrada);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 }
+

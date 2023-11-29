@@ -10,7 +10,7 @@
     </AnchorPane>
 
 
-    <AnchorPane minHeight="150.0" style="-fx-background-color: lightblue;">
+    <AnchorPane fx:id="controlPasaportesArea" minHeight="150.0" style="-fx-background-color: lightblue;">
         <Label text="Control de Pasaportes" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="20.0"/>
         <!-- Aquí puedes añadir más elementos para las cabinas -->
     </AnchorPane>

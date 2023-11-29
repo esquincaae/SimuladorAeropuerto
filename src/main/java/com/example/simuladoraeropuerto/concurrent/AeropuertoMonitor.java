@@ -3,6 +3,7 @@ package com.example.simuladoraeropuerto.concurrent;
 import com.example.simuladoraeropuerto.models.Pasajero;
 import javafx.application.Platform;
 import javafx.scene.layout.Pane;
+import javafx.scene.shape.Circle;
 
 public class AeropuertoMonitor {
     private final Pane airportArea;
@@ -21,23 +22,25 @@ public class AeropuertoMonitor {
                 Thread.currentThread().interrupt();
             }
         }
-        // Calcula la posición del nuevo pasajero
-        double xPosition = 50 + pasajerosActuales * 30; // Ajustar estos valores según la disposición deseada
-        double yPosition = 50; // Ajustar según la disposición deseada
 
         // Añadir pasajero a la zona de entrada y actualizar contador
-        Platform.runLater(() -> {
-            pasajero.getRepresentacion().setCenterX(xPosition);
-            pasajero.getRepresentacion().setCenterY(yPosition);
-            airportArea.getChildren().add(pasajero.getRepresentacion());
-        });
+        // Calcula la posición del nuevo pasajero y su equipaje
+        int xPosition = 50 + pasajerosActuales * 30; // Ajustar estos valores según la disposición deseada
+        int yPosition = 50; // Ajustar según la disposición deseada
+
+        pasajero.ModificarRepresentacion(xPosition, yPosition, true);
+        pasajero.ModificarEquipaje(xPosition+15, yPosition, true);
+
         pasajerosActuales++;
     }
 
     public synchronized void salirPasajero(Pasajero pasajero) {
-        // Remover pasajero de la zona de entrada y actualizar contador
-        Platform.runLater(() -> airportArea.getChildren().remove(pasajero.getRepresentacion()));
+        // Remover pasajero y equipaje de la zona de entrada y actualizar contador
+        Platform.runLater(() -> {
+            //airportArea.getChildren().removeAll(pasajero.getRepresentacion(), pasajero.getEquipaje());
+        });
         pasajerosActuales--;
         notifyAll(); // Notificar a otros hilos que hay espacio
     }
+
 }

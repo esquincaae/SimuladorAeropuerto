@@ -6,4 +6,6 @@ module com.example.simuladoraeropuerto {
 
     opens com.example.simuladoraeropuerto to javafx.fxml;
     exports com.example.simuladoraeropuerto;
+    exports com.example.simuladoraeropuerto.controllers;
+    opens com.example.simuladoraeropuerto.controllers to javafx.fxml;
 }

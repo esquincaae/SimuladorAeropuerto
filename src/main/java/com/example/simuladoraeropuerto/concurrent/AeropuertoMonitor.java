@@ -51,6 +51,23 @@ public class AeropuertoMonitor {
         });
     }
 
+    public synchronized void teletransportarAgentePasaportes(AgentePasaporte agente) {
+        // Calcula la posición X para el agente de pasaportes en el área de control de pasaportes
+        int xPosition = 50 + agentesActuales * 30;
+        int yPosition = 50; // Ajustar según la posición Y deseada en el área de control de pasaportes
+
+        // Modificar la representación del agente para moverlo al área de control de pasaportes
+        agente.ModificarRepresentacion(xPosition, yPosition, true);
+
+        // Añadir el agente al área de control de pasaportes
+        Platform.runLater(() -> {
+            if (agente.getRepresentacion().getCircle().getParent() != null) {
+                ((Pane) agente.getRepresentacion().getCircle().getParent()).getChildren().remove(agente.getRepresentacion().getCircle());
+            }
+            controlPasaportesArea.getChildren().add(agente.getRepresentacion().getCircle());
+        });
+    }
+
 
     public synchronized int entrarPasajero(Pasajero pasajero) {
         while (pasajerosActuales >= maxPasajeros) {

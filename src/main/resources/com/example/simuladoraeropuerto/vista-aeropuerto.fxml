@@ -20,7 +20,7 @@
         <!-- Elementos para representar la cinta de equipaje -->
     </AnchorPane>
 
-    <AnchorPane minHeight="150.0" style="-fx-background-color: lightgreen;">
+    <AnchorPane fx:id="zonaEspera" minHeight="150.0" style="-fx-background-color: lightgreen;">
         <Label text="Zona de Espera" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="20.0"/>
     </AnchorPane>
 

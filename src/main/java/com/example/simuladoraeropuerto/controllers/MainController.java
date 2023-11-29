@@ -17,6 +17,10 @@ import java.util.concurrent.Executors;
 public class MainController implements Observer {
     @FXML
     private Pane airportArea; // Área del aeropuerto donde se mostrarán los pasajeros
+
+    @FXML
+    private Pane zonaEspera; // Agregar esta línea
+
     @FXML
     private Pane controlPasaportesArea; // Área de control de pasaportes
     @FXML
@@ -27,7 +31,8 @@ public class MainController implements Observer {
 
     @FXML
     public void initialize() {
-        monitor = new AeropuertoMonitor(airportArea, controlPasaportesArea, equipajeArea);
+        monitor = new AeropuertoMonitor(airportArea, controlPasaportesArea, equipajeArea, zonaEspera);
+
 
         // Inicializar y arrancar el hilo de pasajeros
         HiloPasajero hiloPasajero = new HiloPasajero(monitor);
@@ -60,13 +65,13 @@ public class MainController implements Observer {
                     // Determinar dónde añadir el círculo en función del tipo de objeto observado
                     if (o instanceof HiloPasajero) {
                         airportArea.getChildren().add(c.getCircle());
-                    } else if (o instanceof HiloAgentePasaporte) {
-                        controlPasaportesArea.getChildren().add(c.getCircle());
-                    } else if (o instanceof HiloAgenteEquipaje) {
-                        equipajeArea.getChildren().add(c.getCircle());
+                    } else {
+                        // Tanto agentes de pasaporte como de equipaje se añaden a la zona de espera
+                        zonaEspera.getChildren().add(c.getCircle());
                     }
                 });
             }
         }
     }
+
 }

@@ -8,6 +8,7 @@ import javafx.scene.layout.Pane;
 
 public class AeropuertoMonitor {
     private final Pane airportArea;
+    private final Pane zonaEspera;
 
     private final Pane equipajeArea;
     private final Pane controlPasaportesArea;
@@ -21,11 +22,13 @@ public class AeropuertoMonitor {
 
     public static final int MAX_AGENTES = 10;
 
-    public AeropuertoMonitor(Pane airportArea, Pane controlPasaportesArea, Pane equipajeArea) {
+    public AeropuertoMonitor(Pane airportArea, Pane controlPasaportesArea, Pane equipajeArea, Pane zonaEspera) {
         this.airportArea = airportArea;
         this.controlPasaportesArea = controlPasaportesArea;
-        this.equipajeArea = equipajeArea; // Inicializar equipajeArea
+        this.equipajeArea = equipajeArea;
+        this.zonaEspera = zonaEspera;
     }
+
 
 
     public synchronized void entrarPasajero(Pasajero pasajero) {
@@ -64,13 +67,15 @@ public class AeropuertoMonitor {
             }
         }
 
+        // Calcula la posición X para el agente de equipaje
         int xPosition = 50 + agentesEquipajeActuales * 30;
-        int yPosition = 120; // Ajustar según la disposición deseada
 
-        agente.ModificarRepresentacion(xPosition, yPosition, true);
+        // Modificar la representación del agente para moverlo a la zona de espera
+        agente.ModificarRepresentacion(xPosition, 150, true); // Ajusta la posición Y según sea necesario
 
+        // Añadir el agente a la zona de espera
         Platform.runLater(() -> {
-            equipajeArea.getChildren().add(agente.getRepresentacion().getCircle());
+            zonaEspera.getChildren().add(agente.getRepresentacion().getCircle());
         });
 
         agentesEquipajeActuales++;
@@ -86,15 +91,15 @@ public class AeropuertoMonitor {
             }
         }
 
-        // Cálculo y asignación de posición para el agente en la zona de control de pasaportes
-        int xPosition = 50 + agentesActuales * 30; // Ajusta estos valores según la disposición deseada
-        int yPosition = 120; // Este valor podría ser diferente para los agentes
+        // Calcula la posición X para el agente de pasaporte
+        int xPosition = 50 + agentesActuales * 30;
 
-        agente.ModificarRepresentacion(xPosition, yPosition, true);
+        // Modificar la representación del agente para moverlo a la zona de espera
+        agente.ModificarRepresentacion(xPosition, 100, true); // Ajusta la posición Y según sea necesario
 
-        // Añadir la representación del agente al Pane de control de pasaportes
+        // Añadir el agente a la zona de espera
         Platform.runLater(() -> {
-            controlPasaportesArea.getChildren().add(agente.getRepresentacion().getCircle());
+            zonaEspera.getChildren().add(agente.getRepresentacion().getCircle());
         });
 
         agentesActuales++;

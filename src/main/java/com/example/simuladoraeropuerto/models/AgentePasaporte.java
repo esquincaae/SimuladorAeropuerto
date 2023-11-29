@@ -14,4 +14,9 @@ public class AgentePasaporte {
     public Circulo getRepresentacion() {
         return representacion;
     }
+
+    public void ModificarRepresentacion(int x, int y, boolean estar) {
+        this.representacion.setCircle(x, y);
+        this.representacion.setEstar(estar);
+    }
 }

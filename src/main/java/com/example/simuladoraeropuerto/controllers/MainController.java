@@ -4,6 +4,7 @@ import com.example.simuladoraeropuerto.concurrent.AeropuertoMonitor;
 import com.example.simuladoraeropuerto.models.AgentePasaporte;
 import com.example.simuladoraeropuerto.models.Circulo;
 import com.example.simuladoraeropuerto.models.Pasajero;
+import com.example.simuladoraeropuerto.threads.HiloAgentePasaporte;
 import com.example.simuladoraeropuerto.threads.HiloPasajero;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -27,51 +28,39 @@ public class MainController implements Observer {
 
     @FXML
     public void initialize() {
-        monitor = new AeropuertoMonitor(airportArea);
+        monitor = new AeropuertoMonitor(airportArea, controlPasaportesArea);
 
-        // Inicializa el agente de pasaporte
-        inicializarAgentePasaporte();
-
-        // Configura y arranca el hilo de pasajeros
+        // Inicializar y arrancar el hilo de pasajeros
         HiloPasajero hiloPasajero = new HiloPasajero(monitor);
         hiloPasajero.addObserver(this);
-        Thread h = new Thread(hiloPasajero);
-        h.start();
+        Thread hPasajero = new Thread(hiloPasajero);
+        hPasajero.start();
+
+        // Inicializar y arrancar el hilo de agentes de pasaporte
+        HiloAgentePasaporte hiloAgente = new HiloAgentePasaporte(monitor);
+        hiloAgente.addObserver(this);
+        Thread hAgente = new Thread(hiloAgente);
+        hAgente.start();
     }
-
-    private void inicializarAgentePasaporte() {
-        Platform.runLater(() -> {
-            for (int i = 0; i < NUMERO_AGENTES; i++) {
-                AgentePasaporte agente = new AgentePasaporte();
-
-                // Calcula la posición de cada agente
-                double espacioEntreAgentes = controlPasaportesArea.getWidth() / NUMERO_AGENTES;
-                double posicionXAgente = espacioEntreAgentes * i + espacioEntreAgentes / 2 - agente.getRepresentacion().getCircle().getRadius();
-                double posicionYAgente = controlPasaportesArea.getHeight() / 2 - agente.getRepresentacion().getCircle().getRadius();
-
-                // Ajusta la posición del agente
-                agente.getRepresentacion().setCircle((int) posicionXAgente, (int) posicionYAgente);
-
-                // Añade el agente al Pane
-                controlPasaportesArea.getChildren().add(agente.getRepresentacion().getCircle());
-            }
-        });
-    }
-
-
 
     @Override
     public void update(Observable o, Object arg) {
         if (arg instanceof Circulo) {
             Circulo c = (Circulo) arg;
-            if(c.isEstar()){
+            if (c.isEstar()) {
                 Platform.runLater(() -> {
-                    if(c.getCircle().getParent() != null){
-                        ((Pane)c.getCircle().getParent()).getChildren().remove(c.getCircle());
+                    if (c.getCircle().getParent() != null) {
+                        ((Pane) c.getCircle().getParent()).getChildren().remove(c.getCircle());
                     }
-                    airportArea.getChildren().add(c.getCircle());
+                    // Determinar dónde añadir el círculo en función del tipo de objeto observado
+                    if (o instanceof HiloPasajero) {
+                        airportArea.getChildren().add(c.getCircle());
+                    } else if (o instanceof HiloAgentePasaporte) {
+                        controlPasaportesArea.getChildren().add(c.getCircle());
+                    }
                 });
             }
         }
     }
 }
+

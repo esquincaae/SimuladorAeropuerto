@@ -6,17 +6,19 @@ import javafx.scene.shape.Circle;
 public class Pasajero {
     private Circulo representacion;
     private Circulo equipaje; // Nuevo atributo para el equipaje
-
     private AgentePasaporte agenteAsignado;
+
+    private int posicionPasaportes; // Añadido para la posición en área de pasaportes
+    private int posicionEquipaje;   // Añadido para la posición en área de equipaje
 
     public Pasajero() {
         Circle circleP = new Circle(10, Color.RED);
         this.representacion = new Circulo(circleP); // Círculo rojo como representación del pasajero
         Circle circleE = new Circle(5, Color.BROWN);
-        this.equipaje =  new Circulo(circleE);// Círculo más pequeño y café para el equipaje
+        this.equipaje =  new Circulo(circleE); // Círculo más pequeño y café para el equipaje
     }
 
-    public void ModificarRepresentacion(int x, int y, boolean e){
+    public void ModificarRepresentacion(int x, int y, boolean e) {
         this.representacion.setCircle(x, y);
         this.representacion.setEstar(e);
     }
@@ -29,7 +31,7 @@ public class Pasajero {
         return this.agenteAsignado;
     }
 
-    public void ModificarEquipaje(int x, int y, boolean e){
+    public void ModificarEquipaje(int x, int y, boolean e) {
         this.equipaje.setCircle(x, y);
         this.equipaje.setEstar(e);
     }
@@ -41,5 +43,21 @@ public class Pasajero {
     public Circulo getEquipaje() {
         return equipaje;
     }
-}
 
+    // Métodos nuevos para manejar las posiciones en pasaportes y equipaje
+    public int getPosicionPasaportes() {
+        return posicionPasaportes;
+    }
+
+    public void setPosicionPasaportes(int posicionPasaportes) {
+        this.posicionPasaportes = posicionPasaportes;
+    }
+
+    public int getPosicionEquipaje() {
+        return posicionEquipaje;
+    }
+
+    public void setPosicionEquipaje(int posicionEquipaje) {
+        this.posicionEquipaje = posicionEquipaje;
+    }
+}

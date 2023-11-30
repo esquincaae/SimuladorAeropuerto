@@ -48,26 +48,40 @@ public class AeropuertoMonitor {
     }
 
     public synchronized void teletransportarAPasaportes(Pasajero pasajero, int posicionEntrada) {
+        // Liberar la posición de entrada que ocupaba el pasajero
         posicionesEntrada[posicionEntrada] = false;
-        pasajerosActuales--;
 
+        // Asignar una posición libre en el área de pasaportes
         int posicionPasaportes = asignarPosicionLibre(posicionesPasaportes);
+        if (posicionPasaportes == -1) {
+            // Manejo de error: no hay posiciones libres en pasaportes
+            // Considera cómo manejar esto, quizás reintegrar al pasajero en la cola
+            return;
+        }
+        pasajero.setPosicionPasaportes(posicionPasaportes); // Guardar la posición asignada en pasaportes
+
+        // Calcular la posición X e Y para el pasajero y su equipaje en el área de pasaportes
         int xPosition = 50 + posicionPasaportes * 30;
         int yPosition = 80;
 
+        // Actualizar la representación del pasajero y su equipaje
         pasajero.ModificarRepresentacion(xPosition, yPosition, true);
         pasajero.ModificarEquipaje(xPosition + 15, yPosition, true);
 
+        // Mover al pasajero y su equipaje a la zona de control de pasaportes
         Platform.runLater(() -> {
             airportArea.getChildren().removeAll(pasajero.getRepresentacion().getCircle(), pasajero.getEquipaje().getCircle());
             controlPasaportesArea.getChildren().addAll(pasajero.getRepresentacion().getCircle(), pasajero.getEquipaje().getCircle());
         });
 
+        // Asignar un agente de pasaportes al pasajero
         asignarAgentePasaportes(pasajero, xPosition, 120);
 
-        // Elimina la lógica de la espera y el retorno del agente aquí
-        // El agente ahora será regresado a la zona de espera en teletransportarAEquipaje
+        // Decrementar pasajerosActuales solo después de que el pasajero haya completado todo el proceso en el área de pasaportes
+        pasajerosActuales--;
     }
+
+
 
 
     private void asignarAgentePasaportes(Pasajero pasajero, int xPosition, int yAgentePosition) {
@@ -83,8 +97,6 @@ public class AeropuertoMonitor {
 
             AgentePasaporte agenteAsignado = agentesPasaportesDisponibles.remove();
             pasajero.setAgenteAsignado(agenteAsignado);
-
-            // Teletransportar al agente a la posición correcta
             teletransportarAgentePasaportes(agenteAsignado, xPosition, yAgentePosition);
         }
     }
@@ -107,7 +119,7 @@ public class AeropuertoMonitor {
     }
 
 
-    public void teletransportarAgentePasaportes(AgentePasaporte agente, int x, int y) {
+    private void teletransportarAgentePasaportes(AgentePasaporte agente, int x, int y) {
         agente.ModificarRepresentacion(x, y, true);
         Platform.runLater(() -> {
             if (agente.getRepresentacion().getCircle().getParent() != null) {
@@ -117,22 +129,34 @@ public class AeropuertoMonitor {
         });
     }
 
-
     public synchronized int entrarPasajero(Pasajero pasajero) {
+        // Espera hasta que haya espacio para un nuevo pasajero
         while (pasajerosActuales >= maxPasajeros) {
             try {
                 wait();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
+                return -1; // Manejo de interrupción
             }
         }
 
+        // Asignar una posición libre en la zona de entrada
         int posicion = asignarPosicionLibre(posicionesEntrada);
+        if (posicion == -1) {
+            // Manejo de error: no hay posiciones libres en la entrada
+            // Considera cómo manejar esto, quizás reintegrar al pasajero en la cola
+            return -1;
+        }
+
+        // Calcular la posición X e Y para el pasajero y su equipaje en la zona de entrada
         int xPosition = 50 + posicion * 30;
         int yPosition = 50;
+
+        // Actualizar la representación del pasajero y su equipaje
         pasajero.ModificarRepresentacion(xPosition, yPosition, true);
         pasajero.ModificarEquipaje(xPosition + 15, yPosition, true);
 
+        // Incrementar el contador de pasajeros actuales
         pasajerosActuales++;
         return posicion;
     }
@@ -150,12 +174,22 @@ public class AeropuertoMonitor {
 
     public synchronized void teletransportarAEquipaje(Pasajero pasajero) {
         int posicionEquipaje = asignarPosicionLibre(posicionesEquipaje);
+        if (posicionEquipaje == -1) {
+            // Manejo de error: no hay posiciones libres en equipaje
+            // Considera cómo manejar esto, quizás reintegrar al pasajero en la cola
+            return;
+        }
+        pasajero.setPosicionEquipaje(posicionEquipaje); // Guardar la posición asignada en equipaje
+
+        // Calcular la posición X e Y para el pasajero y su equipaje en el área de equipaje
         int xPosition = 50 + posicionEquipaje * 30;
         int yPosition = 150;
 
+        // Actualizar la representación del pasajero y su equipaje
         pasajero.ModificarRepresentacion(xPosition, yPosition, true);
         pasajero.ModificarEquipaje(xPosition + 15, yPosition, true);
 
+        // Mover al pasajero y su equipaje a la zona de equipaje
         Platform.runLater(() -> {
             controlPasaportesArea.getChildren().removeAll(pasajero.getRepresentacion().getCircle(), pasajero.getEquipaje().getCircle());
             equipajeArea.getChildren().addAll(pasajero.getRepresentacion().getCircle(), pasajero.getEquipaje().getCircle());
@@ -175,25 +209,30 @@ public class AeropuertoMonitor {
             }
         }).start();
 
-        // Gestión de agentes de equipaje
-        while (agentesEquipajeDisponibles.isEmpty()) {
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                return;
+        // Gestión de agentes de equipaje en un hilo separado
+        new Thread(() -> {
+            synchronized (AeropuertoMonitor.this) {
+                while (agentesEquipajeDisponibles.isEmpty()) {
+                    try {
+                        wait();
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        return;
+                    }
+                }
+                AgenteEquipaje agenteAsignado = agentesEquipajeDisponibles.remove();
+                teletransportarAgenteEquipaje(agenteAsignado, posicionEquipaje);
+
+                // Regresar al agente de pasaportes a la zona de espera
+                if (pasajero.getAgenteAsignado() != null) {
+                    regresarAgenteAEspera(pasajero.getAgenteAsignado());
+                    pasajero.setAgenteAsignado(null);
+                    pasajerosActuales--; // Decrementar aquí después de completar el proceso en pasaportes
+                }
             }
-        }
-
-        AgenteEquipaje agenteAsignado = agentesEquipajeDisponibles.remove();
-        teletransportarAgenteEquipaje(agenteAsignado, posicionEquipaje);
-
-        // Regresar al agente de pasaportes a la zona de espera
-        if (pasajero.getAgenteAsignado() != null) {
-            regresarAgenteAEspera(pasajero.getAgenteAsignado());
-            pasajero.setAgenteAsignado(null); // Resetea el agente asignado del pasajero
-        }
+        }).start();
     }
+
 
     private void asignarYTeletransportarAgenteEquipaje(Pasajero pasajero, int xPosition, int yPosition) {
         synchronized (this) {
@@ -272,14 +311,18 @@ public class AeropuertoMonitor {
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
                     }
+
+                    synchronized (AeropuertoMonitor.this) {
+                        posicionesEquipaje[pasajero.getPosicionEquipaje()] = false; // Libera la posición de equipaje
+                        pasajerosActuales--; // Decrementa el contador de pasajeros
+                        notifyAll(); // Notifica a los hilos en espera de que hay un espacio libre
+                    }
                 }).start();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
         }).start();
     }
-
-
 
 
 

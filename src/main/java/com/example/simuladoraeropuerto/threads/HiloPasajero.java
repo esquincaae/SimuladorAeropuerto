@@ -16,27 +16,26 @@ public class HiloPasajero extends Observable implements Runnable {
 
     public HiloPasajero(AeropuertoMonitor monitor) {
         this.monitor = monitor;
+        this.executorService = Executors.newCachedThreadPool();
     }
 
     @Override
     public void run() {
-        while (true) {
-            executorService = Executors.newCachedThreadPool();
-            executorService.execute(this::rutina);
+        while (!Thread.currentThread().isInterrupted()) {
+            executorService.execute(this::manejarPasajero);
 
             try {
-                Thread.sleep(1000);
+                Thread.sleep(500); // Tiempo antes de generar otro pasajero
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
         }
     }
 
-    private void rutina() {
+    private void manejarPasajero() {
         Pasajero pasajero = new Pasajero();
         entrarYTeletransportar(pasajero);
     }
-
 
     private void entrarYTeletransportar(Pasajero pasajero) {
         int posicionEntrada = monitor.entrarPasajero(pasajero);
@@ -60,14 +59,4 @@ public class HiloPasajero extends Observable implements Runnable {
             Thread.currentThread().interrupt();
         }
     }
-
-    private void esperarYTeletransportar(Pasajero pasajero, int posicionEntrada) {
-        try {
-            Thread.sleep((random.nextInt(5) + 1) * 1000); // Espera de 1 a 5 segundos
-            monitor.teletransportarAPasaportes(pasajero, posicionEntrada);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-    }
 }
-

@@ -7,6 +7,8 @@ public class Pasajero {
     private Circulo representacion;
     private Circulo equipaje; // Nuevo atributo para el equipaje
 
+    private AgentePasaporte agenteAsignado;
+
     public Pasajero() {
         Circle circleP = new Circle(10, Color.RED);
         this.representacion = new Circulo(circleP); // Círculo rojo como representación del pasajero
@@ -17,6 +19,14 @@ public class Pasajero {
     public void ModificarRepresentacion(int x, int y, boolean e){
         this.representacion.setCircle(x, y);
         this.representacion.setEstar(e);
+    }
+
+    public void setAgenteAsignado(AgentePasaporte agente) {
+        this.agenteAsignado = agente;
+    }
+
+    public AgentePasaporte getAgenteAsignado() {
+        return this.agenteAsignado;
     }
 
     public void ModificarEquipaje(int x, int y, boolean e){

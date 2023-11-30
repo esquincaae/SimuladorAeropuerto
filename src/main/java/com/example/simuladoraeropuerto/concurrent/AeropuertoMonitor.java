@@ -69,7 +69,9 @@ public class AeropuertoMonitor {
         }
 
         AgentePasaporte agenteAsignado = agentesPasaportesDisponibles.remove();
+        pasajero.setAgenteAsignado(agenteAsignado);
         teletransportarAgentePasaportes(agenteAsignado, xPosition, yAgentePosition);
+
 
         // Nueva lógica para regresar al agente a la zona de espera
         new Thread(() -> {
@@ -84,13 +86,14 @@ public class AeropuertoMonitor {
 
     private synchronized void regresarAgenteAEspera(AgentePasaporte agente) {
         Platform.runLater(() -> {
-            controlPasaportesArea.getChildren().remove(agente.getRepresentacion().getCircle());
+            if (agente.getRepresentacion().getCircle().getParent() != null) {
+                ((Pane) agente.getRepresentacion().getCircle().getParent()).getChildren().remove(agente.getRepresentacion().getCircle());
+            }
             zonaEspera.getChildren().add(agente.getRepresentacion().getCircle());
         });
         agentesPasaportesDisponibles.add(agente);
         notifyAll(); // Notificar a otros hilos que hay un agente disponible
     }
-
 
     public void teletransportarAgentePasaportes(AgentePasaporte agente, int x, int y) {
         agente.ModificarRepresentacion(x, y, true);
@@ -145,7 +148,15 @@ public class AeropuertoMonitor {
             controlPasaportesArea.getChildren().removeAll(pasajero.getRepresentacion().getCircle(), pasajero.getEquipaje().getCircle());
             equipajeArea.getChildren().addAll(pasajero.getRepresentacion().getCircle(), pasajero.getEquipaje().getCircle());
         });
+
+        // Comprueba si el pasajero tiene un agente asignado y si es así, devuelve el agente a la zona de espera
+        AgentePasaporte agenteAsignado = pasajero.getAgenteAsignado();
+        if (agenteAsignado != null) {
+            regresarAgenteAEspera(agenteAsignado);
+            pasajero.setAgenteAsignado(null); // Eliminar la referencia al agente del pasajero
+        }
     }
+
 
 
     public synchronized void salirPasajero(Pasajero pasajero) {

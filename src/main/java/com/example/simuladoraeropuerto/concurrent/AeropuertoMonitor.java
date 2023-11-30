@@ -75,16 +75,11 @@ public class AeropuertoMonitor {
         });
 
         // Asignar un agente de pasaportes al pasajero
-        asignarAgentePasaportes(pasajero, xPosition, 120);
-
-        // Decrementar pasajerosActuales solo después de que el pasajero haya completado todo el proceso en el área de pasaportes
-        pasajerosActuales--;
+        asignarAgentePasaportes(pasajero, xPosition, yPosition);
     }
 
 
-
-
-    private void asignarAgentePasaportes(Pasajero pasajero, int xPosition, int yAgentePosition) {
+    private void asignarAgentePasaportes(Pasajero pasajero, int xPosition, int yPosition) {
         synchronized (this) {
             while (agentesPasaportesDisponibles.isEmpty()) {
                 try {
@@ -97,12 +92,27 @@ public class AeropuertoMonitor {
 
             AgentePasaporte agenteAsignado = agentesPasaportesDisponibles.remove();
             pasajero.setAgenteAsignado(agenteAsignado);
-            teletransportarAgentePasaportes(agenteAsignado, xPosition, yAgentePosition);
+            teletransportarAgentePasaportes(agenteAsignado, xPosition, yPosition - 40); // Ajuste en la posición Y para el agente
+
+            // Procesar al pasajero y luego regresar al agente a la espera
+            new Thread(() -> {
+                try {
+                    Thread.sleep(2000); // Simula el tiempo de procesamiento
+                    Platform.runLater(() -> {
+                        controlPasaportesArea.getChildren().removeAll(pasajero.getRepresentacion().getCircle(), pasajero.getEquipaje().getCircle());
+                        // Aquí puedes añadir el código para mover al pasajero a la siguiente zona
+                    });
+                    regresarAgenteAEspera(agenteAsignado); // Regresa el agente a la espera
+                    synchronized (this) {
+                        posicionesPasaportes[pasajero.getPosicionPasaportes()] = false; // Libera la posición en pasaportes
+                        notifyAll(); // Notifica a los hilos en espera
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }).start();
         }
     }
-
-
-
 
     private void regresarAgenteAEspera(AgentePasaporte agente) {
         Platform.runLater(() -> {

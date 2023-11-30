@@ -63,42 +63,51 @@ public class AeropuertoMonitor {
             controlPasaportesArea.getChildren().addAll(pasajero.getRepresentacion().getCircle(), pasajero.getEquipaje().getCircle());
         });
 
-        int yAgentePosition = 120;
-        while (agentesPasaportesDisponibles.isEmpty()) {
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                return;
-            }
-        }
+        asignarAgentePasaportes(pasajero, xPosition, 120);
 
-        AgentePasaporte agenteAsignado = agentesPasaportesDisponibles.remove();
-        pasajero.setAgenteAsignado(agenteAsignado);
-        teletransportarAgentePasaportes(agenteAsignado, xPosition, yAgentePosition);
-
-
-        // Nueva lógica para regresar al agente a la zona de espera
-        new Thread(() -> {
-            try {
-                Thread.sleep((new Random().nextInt(5) + 1) * 1000); // Espera de 1 a 5 segundos
-                regresarAgenteAEspera(agenteAsignado);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        }).start();
+        // Elimina la lógica de la espera y el retorno del agente aquí
+        // El agente ahora será regresado a la zona de espera en teletransportarAEquipaje
     }
 
-    private synchronized void regresarAgenteAEspera(AgentePasaporte agente) {
+
+    private void asignarAgentePasaportes(Pasajero pasajero, int xPosition, int yAgentePosition) {
+        synchronized (this) {
+            while (agentesPasaportesDisponibles.isEmpty()) {
+                try {
+                    wait();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    return;
+                }
+            }
+
+            AgentePasaporte agenteAsignado = agentesPasaportesDisponibles.remove();
+            pasajero.setAgenteAsignado(agenteAsignado);
+
+            // Teletransportar al agente a la posición correcta
+            teletransportarAgentePasaportes(agenteAsignado, xPosition, yAgentePosition);
+        }
+    }
+
+
+
+
+    private void regresarAgenteAEspera(AgentePasaporte agente) {
         Platform.runLater(() -> {
             if (agente.getRepresentacion().getCircle().getParent() != null) {
                 ((Pane) agente.getRepresentacion().getCircle().getParent()).getChildren().remove(agente.getRepresentacion().getCircle());
             }
             zonaEspera.getChildren().add(agente.getRepresentacion().getCircle());
         });
-        agentesPasaportesDisponibles.add(agente);
-        notifyAll(); // Notificar que hay un agente disponible
+
+        synchronized (this) {
+            agentesPasaportesDisponibles.add(agente);
+            notifyAll();
+        }
     }
+
+
+
     public void teletransportarAgentePasaportes(AgentePasaporte agente, int x, int y) {
         agente.ModificarRepresentacion(x, y, true);
         Platform.runLater(() -> {
@@ -153,7 +162,7 @@ public class AeropuertoMonitor {
             equipajeArea.getChildren().addAll(pasajero.getRepresentacion().getCircle(), pasajero.getEquipaje().getCircle());
         });
 
-        // Lógica modificada para llamar al método de salida en lugar de manejarlo aquí
+        // Lógica para el proceso del equipaje y posterior traslado a la zona de salida
         new Thread(() -> {
             try {
                 Thread.sleep(1000); // Espera de 1 segundo
@@ -167,6 +176,7 @@ public class AeropuertoMonitor {
             }
         }).start();
 
+        // Gestión de agentes de equipaje
         while (agentesEquipajeDisponibles.isEmpty()) {
             try {
                 wait();
@@ -178,6 +188,12 @@ public class AeropuertoMonitor {
 
         AgenteEquipaje agenteAsignado = agentesEquipajeDisponibles.remove();
         teletransportarAgenteEquipaje(agenteAsignado, posicionEquipaje);
+
+        // Regresar al agente de pasaportes a la zona de espera
+        if (pasajero.getAgenteAsignado() != null) {
+            regresarAgenteAEspera(pasajero.getAgenteAsignado());
+            pasajero.setAgenteAsignado(null); // Resetea el agente asignado del pasajero
+        }
     }
 
 

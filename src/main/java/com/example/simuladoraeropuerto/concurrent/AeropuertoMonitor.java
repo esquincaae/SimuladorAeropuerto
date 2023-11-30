@@ -81,8 +81,9 @@ public class AeropuertoMonitor {
                 }
             }
 
-            AgentePasaporte agenteAsignado = agentesPasaportesDisponibles.remove();
-            pasajero.setAgenteAsignado(agenteAsignado);
+            pasajero.setAgentePasaporteAsignado(agenteAsignado); // En lugar de setAgenteAsignado
+            AgentePasaporte agenteAsignado = pasajero.getAgentePasaporteAsignado(); // En lugar de getAgenteAsignado
+
 
             // Teletransportar al agente a la posición correcta
             teletransportarAgentePasaportes(agenteAsignado, xPosition, yAgentePosition);
@@ -92,7 +93,7 @@ public class AeropuertoMonitor {
 
 
 
-    private void regresarAgenteAEspera(AgentePasaporte agente) {
+    private void regresarAgenteAEspera(AgenteEquipaje agente) {
         Platform.runLater(() -> {
             if (agente.getRepresentacion().getCircle().getParent() != null) {
                 ((Pane) agente.getRepresentacion().getCircle().getParent()).getChildren().remove(agente.getRepresentacion().getCircle());
@@ -101,10 +102,11 @@ public class AeropuertoMonitor {
         });
 
         synchronized (this) {
-            agentesPasaportesDisponibles.add(agente);
+            agentesEquipajeDisponibles.add(agente);
             notifyAll();
         }
     }
+
 
 
 
@@ -188,12 +190,7 @@ public class AeropuertoMonitor {
 
         AgenteEquipaje agenteAsignado = agentesEquipajeDisponibles.remove();
         teletransportarAgenteEquipaje(agenteAsignado, posicionEquipaje);
-
-        // Regresar al agente de pasaportes a la zona de espera
-        if (pasajero.getAgenteAsignado() != null) {
-            regresarAgenteAEspera(pasajero.getAgenteAsignado());
-            pasajero.setAgenteAsignado(null); // Resetea el agente asignado del pasajero
-        }
+        pasajero.setAgenteEquipajeAsignado(agenteAsignado); // Asignar el agente de equipaje al pasajero
     }
 
 
@@ -210,6 +207,12 @@ public class AeropuertoMonitor {
                     }
                     areaSalida.getChildren().add(pasajero.getRepresentacion().getCircle());
                 });
+
+                // Aquí añadimos la lógica para regresar al agente de equipaje
+                if (pasajero.getAgenteEquipajeAsignado() != null) {
+                    regresarAgenteAEspera(pasajero.getAgenteEquipajeAsignado());
+                    pasajero.setAgenteEquipajeAsignado(null); // Resetea el agente de equipaje asignado del pasajero
+                }
 
                 // Lógica para eliminar al pasajero del área de salida tras 1-5 segundos
                 new Thread(() -> {

@@ -150,6 +150,19 @@ public class AeropuertoMonitor {
             equipajeArea.getChildren().addAll(pasajero.getRepresentacion().getCircle(), pasajero.getEquipaje().getCircle());
         });
 
+        // Espera un segundo antes de quitar el equipaje
+        new Thread(() -> {
+            try {
+                Thread.sleep(1000); // Espera de 1 segundo
+                Platform.runLater(() -> {
+                    equipajeArea.getChildren().remove(pasajero.getEquipaje().getCircle());
+                    pasajero.ModificarEquipaje(0, 0, false); // Opcional: actualizar estado del equipaje
+                });
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }).start();
+
         while (agentesEquipajeDisponibles.isEmpty()) {
             try {
                 wait();

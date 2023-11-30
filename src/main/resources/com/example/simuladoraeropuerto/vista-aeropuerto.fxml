@@ -24,7 +24,7 @@
         <Label text="Zona de Espera" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="20.0"/>
     </AnchorPane>
 
-    <AnchorPane minHeight="150.0" style="-fx-background-color: grey;">
+    <AnchorPane fx:id="areaSalida" minHeight="150.0" style="-fx-background-color: grey;">
         <Label text="Área de Salida" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="20.0"/>
     </AnchorPane>
 </VBox>

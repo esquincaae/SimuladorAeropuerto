@@ -26,12 +26,16 @@ public class MainController implements Observer {
     @FXML
     private Pane equipajeArea; // Área de manejo de equipaje
 
+    @FXML
+    private Pane areaSalida; // Asegúrate de que este Pane esté definido en tu archivo FXML
+
+
     private AeropuertoMonitor monitor;
     private ExecutorService executorService;
 
     @FXML
     public void initialize() {
-        monitor = new AeropuertoMonitor(airportArea, controlPasaportesArea, equipajeArea, zonaEspera);
+        monitor = new AeropuertoMonitor(airportArea, controlPasaportesArea, equipajeArea, zonaEspera, areaSalida);
 
 
         // Inicializar y arrancar el hilo de pasajeros

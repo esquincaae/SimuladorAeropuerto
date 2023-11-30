@@ -14,6 +14,7 @@ public class AeropuertoMonitor {
     private final Pane airportArea;
     private final Pane zonaEspera;
 
+    private final Pane areaSalida;
     private final Pane equipajeArea;
     private final Pane controlPasaportesArea;
     private final int maxPasajeros = 10;
@@ -32,15 +33,17 @@ public class AeropuertoMonitor {
 
     private boolean[] posicionesEquipaje;
 
+
     private Queue<AgentePasaporte> agentesPasaportesDisponibles = new LinkedList<>();
     private Queue<AgenteEquipaje> agentesEquipajeDisponibles = new LinkedList<>();
 
 
-    public AeropuertoMonitor(Pane airportArea, Pane controlPasaportesArea, Pane equipajeArea, Pane zonaEspera) {
+    public AeropuertoMonitor(Pane airportArea, Pane controlPasaportesArea, Pane equipajeArea, Pane zonaEspera, Pane areaSalida) {
         this.airportArea = airportArea;
         this.controlPasaportesArea = controlPasaportesArea;
         this.equipajeArea = equipajeArea;
         this.zonaEspera = zonaEspera;
+        this.areaSalida = areaSalida;
         posicionesEquipaje = new boolean[maxPasajeros];
     }
 
@@ -150,13 +153,24 @@ public class AeropuertoMonitor {
             equipajeArea.getChildren().addAll(pasajero.getRepresentacion().getCircle(), pasajero.getEquipaje().getCircle());
         });
 
-        // Espera un segundo antes de quitar el equipaje
+        // Espera un segundo antes de quitar el equipaje y luego teletransportar al pasajero a la salida
         new Thread(() -> {
             try {
                 Thread.sleep(1000); // Espera de 1 segundo
                 Platform.runLater(() -> {
                     equipajeArea.getChildren().remove(pasajero.getEquipaje().getCircle());
                     pasajero.ModificarEquipaje(0, 0, false); // Opcional: actualizar estado del equipaje
+                });
+
+                // Espera un tiempo aleatorio entre 2 y 5 segundos para teletransportar al pasajero a la salida
+                int espera = new Random().nextInt(4) + 2; // genera un número entre 2 y 5
+                Thread.sleep(espera * 1000);
+
+                Platform.runLater(() -> {
+                    if (pasajero.getRepresentacion().getCircle().getParent() != null) {
+                        ((Pane) pasajero.getRepresentacion().getCircle().getParent()).getChildren().remove(pasajero.getRepresentacion().getCircle());
+                    }
+                    areaSalida.getChildren().add(pasajero.getRepresentacion().getCircle());
                 });
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -175,6 +189,7 @@ public class AeropuertoMonitor {
         AgenteEquipaje agenteAsignado = agentesEquipajeDisponibles.remove();
         teletransportarAgenteEquipaje(agenteAsignado, posicionEquipaje);
     }
+
 
 
     public synchronized void teletransportarAgenteEquipaje(AgenteEquipaje agente, int posicionEquipaje) {
@@ -242,5 +257,7 @@ public class AeropuertoMonitor {
         agentesPasaportesDisponibles.add(agente);
         notifyAll();
     }
+
+
 
 }

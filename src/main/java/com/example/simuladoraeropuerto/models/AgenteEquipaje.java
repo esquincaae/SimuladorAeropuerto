@@ -7,7 +7,7 @@ public class AgenteEquipaje {
     private Circulo representacion;
 
     public AgenteEquipaje() {
-        Circle circle = new Circle(10, Color.GREEN); // Círculo verde para el agente de equipaje
+        Circle circle = new Circle(10, Color.GREEN);
         this.representacion = new Circulo(circle);
     }
 

@@ -12,22 +12,19 @@ import javafx.scene.layout.Pane;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 public class MainController implements Observer {
     @FXML
-    private Pane airportArea; // Área del aeropuerto donde se mostrarán los pasajeros
+    private Pane airportArea;
 
     @FXML
-    private Pane zonaEspera; // Agregar esta línea
+    private Pane zonaEspera;
 
     @FXML
-    private Pane controlPasaportesArea; // Área de control de pasaportes
+    private Pane controlPasaportesArea;
     @FXML
-    private Pane equipajeArea; // Área de manejo de equipaje
-
+    private Pane equipajeArea;
     @FXML
-    private Pane areaSalida; // Asegúrate de que este Pane esté definido en tu archivo FXML
+    private Pane areaSalida;
 
 
     private AeropuertoMonitor monitor;
@@ -38,19 +35,16 @@ public class MainController implements Observer {
         monitor = new AeropuertoMonitor(airportArea, controlPasaportesArea, equipajeArea, zonaEspera, areaSalida);
 
 
-        // Inicializar y arrancar el hilo de pasajeros
         HiloPasajero hiloPasajero = new HiloPasajero(monitor);
         hiloPasajero.addObserver(this);
         Thread hPasajero = new Thread(hiloPasajero);
         hPasajero.start();
 
-        // Inicializar y arrancar el hilo de agentes de pasaporte
         HiloAgentePasaporte hiloAgentePasaporte = new HiloAgentePasaporte(monitor);
         hiloAgentePasaporte.addObserver(this);
         Thread hAgentePasaporte = new Thread(hiloAgentePasaporte);
         hAgentePasaporte.start();
 
-        // Inicializar y arrancar el hilo de agentes de equipaje
         HiloAgenteEquipaje hiloAgenteEquipaje = new HiloAgenteEquipaje(monitor);
         hiloAgenteEquipaje.addObserver(this);
         Thread hAgenteEquipaje = new Thread(hiloAgenteEquipaje);
@@ -66,11 +60,9 @@ public class MainController implements Observer {
                     if (c.getCircle().getParent() != null) {
                         ((Pane) c.getCircle().getParent()).getChildren().remove(c.getCircle());
                     }
-                    // Determinar dónde añadir el círculo en función del tipo de objeto observado
                     if (o instanceof HiloPasajero) {
                         airportArea.getChildren().add(c.getCircle());
                     } else {
-                        // Tanto agentes de pasaporte como de equipaje se añaden a la zona de espera
                         zonaEspera.getChildren().add(c.getCircle());
                     }
                 });

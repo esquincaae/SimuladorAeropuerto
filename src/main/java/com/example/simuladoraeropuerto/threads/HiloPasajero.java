@@ -25,7 +25,7 @@ public class HiloPasajero extends Observable implements Runnable {
             executorService.execute(this::manejarPasajero);
 
             try {
-                Thread.sleep(500); // Tiempo antes de generar otro pasajero
+                Thread.sleep(500);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }

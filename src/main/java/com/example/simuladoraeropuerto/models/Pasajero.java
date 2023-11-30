@@ -5,17 +5,17 @@ import javafx.scene.shape.Circle;
 
 public class Pasajero {
     private Circulo representacion;
-    private Circulo equipaje; // Nuevo atributo para el equipaje
+    private Circulo equipaje;
     private AgentePasaporte agenteAsignado;
 
-    private int posicionPasaportes; // Añadido para la posición en área de pasaportes
-    private int posicionEquipaje;   // Añadido para la posición en área de equipaje
+    private int posicionPasaportes;
+    private int posicionEquipaje;
 
     public Pasajero() {
         Circle circleP = new Circle(10, Color.RED);
-        this.representacion = new Circulo(circleP); // Círculo rojo como representación del pasajero
+        this.representacion = new Circulo(circleP);
         Circle circleE = new Circle(5, Color.BROWN);
-        this.equipaje =  new Circulo(circleE); // Círculo más pequeño y café para el equipaje
+        this.equipaje =  new Circulo(circleE);
     }
 
     public void ModificarRepresentacion(int x, int y, boolean e) {
@@ -44,7 +44,6 @@ public class Pasajero {
         return equipaje;
     }
 
-    // Métodos nuevos para manejar las posiciones en pasaportes y equipaje
     public int getPosicionPasaportes() {
         return posicionPasaportes;
     }

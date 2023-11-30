@@ -5,7 +5,6 @@ import com.example.simuladoraeropuerto.models.AgentePasaporte;
 import javafx.application.Platform;
 
 import java.util.Observable;
-import java.util.Random;
 
 public class HiloAgentePasaporte extends Observable implements Runnable {
     private final AeropuertoMonitor monitor;
@@ -25,7 +24,6 @@ public class HiloAgentePasaporte extends Observable implements Runnable {
                 notifyObservers(agente.getRepresentacion());
             });
 
-            // No es necesario mover al agente aquí, ya que se mueve en teletransportarAPasaportes
         }
     }
 

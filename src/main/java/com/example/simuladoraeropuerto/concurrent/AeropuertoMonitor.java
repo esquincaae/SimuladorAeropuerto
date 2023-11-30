@@ -33,6 +33,8 @@ public class AeropuertoMonitor {
     private boolean[] posicionesEquipaje;
 
     private Queue<AgentePasaporte> agentesPasaportesDisponibles = new LinkedList<>();
+    private Queue<AgenteEquipaje> agentesEquipajeDisponibles = new LinkedList<>();
+
 
     public AeropuertoMonitor(Pane airportArea, Pane controlPasaportesArea, Pane equipajeArea, Pane zonaEspera) {
         this.airportArea = airportArea;
@@ -138,7 +140,7 @@ public class AeropuertoMonitor {
     public synchronized void teletransportarAEquipaje(Pasajero pasajero) {
         int posicionEquipaje = asignarPosicionLibre(posicionesEquipaje);
         int xPosition = 50 + posicionEquipaje * 30;
-        int yPosition = 80; // Ajusta según la disposición de tu UI
+        int yPosition = 150;
 
         pasajero.ModificarRepresentacion(xPosition, yPosition, true);
         pasajero.ModificarEquipaje(xPosition + 15, yPosition, true);
@@ -148,25 +150,25 @@ public class AeropuertoMonitor {
             equipajeArea.getChildren().addAll(pasajero.getRepresentacion().getCircle(), pasajero.getEquipaje().getCircle());
         });
 
-        // Regresar al agente de pasaportes a la zona de espera cuando el pasajero se mueve al área de equipaje
-        AgentePasaporte agenteAsignado = pasajero.getAgenteAsignado();
-        if (agenteAsignado != null) {
-            regresarAgenteAEspera(agenteAsignado);
-            pasajero.setAgenteAsignado(null); // Quitar la asignación del agente al pasajero
+        while (agentesEquipajeDisponibles.isEmpty()) {
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return;
+            }
         }
+
+        AgenteEquipaje agenteAsignado = agentesEquipajeDisponibles.remove();
+        teletransportarAgenteEquipaje(agenteAsignado, posicionEquipaje);
     }
 
-    public synchronized void teletransportarAgenteEquipaje(AgenteEquipaje agente) {
-        // Calcula una posición aleatoria en la zona de equipaje
-        Random random = new Random();
-        int posicionEquipaje = random.nextInt(MAX_AGENTES_EQUIPAJE);
+
+    public synchronized void teletransportarAgenteEquipaje(AgenteEquipaje agente, int posicionEquipaje) {
         int xPosition = 50 + posicionEquipaje * 30;
-        int yPositionEquipaje = 80; // Ajusta la posición Y según sea necesario para la zona de equipaje
+        int yPositionEquipaje = 80;
 
-        // Actualiza la posición del agente
         agente.ModificarRepresentacion(xPosition, yPositionEquipaje, true);
-
-        // Actualiza la UI en el hilo de JavaFX
         Platform.runLater(() -> {
             if (agente.getRepresentacion().getCircle().getParent() != null) {
                 ((Pane) agente.getRepresentacion().getCircle().getParent()).getChildren().remove(agente.getRepresentacion().getCircle());
@@ -174,6 +176,7 @@ public class AeropuertoMonitor {
             equipajeArea.getChildren().add(agente.getRepresentacion().getCircle());
         });
     }
+
     public synchronized void entrarAgenteEquipaje(AgenteEquipaje agente) {
         // Espera si el área de la zona de espera está llena
         while (agentesEquipajeActuales >= MAX_AGENTES_EQUIPAJE) {
@@ -187,7 +190,7 @@ public class AeropuertoMonitor {
 
         // Calcula la posición X para el agente en la zona de espera
         int xPosition = 50 + agentesEquipajeActuales * 30;
-        int yPositionZonaEspera = 150; // Ajusta la posición Y según sea necesario para la zona de espera
+        int yPositionZonaEspera = 150;
 
         // Modifica la representación del agente para moverlo a la zona de espera
         agente.ModificarRepresentacion(xPosition, yPositionZonaEspera, true);
@@ -198,19 +201,11 @@ public class AeropuertoMonitor {
         });
 
         agentesEquipajeActuales++;
-
-        // Crea un hilo para mover aleatoriamente al agente a la zona de equipaje
-        new Thread(() -> {
-            try {
-                while (true) {
-                    Thread.sleep((new Random().nextInt(5) + 1) * 1000); // Espera aleatoria entre 1 y 5 segundos
-                    teletransportarAgenteEquipaje(agente);
-                }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        }).start();
+        agentesEquipajeDisponibles.add(agente); // Añadir agente a la cola de disponibles
+        notifyAll(); // Notificar que hay un agente disponible
     }
+
+
 
 
 

@@ -153,7 +153,7 @@ public class AeropuertoMonitor {
             equipajeArea.getChildren().addAll(pasajero.getRepresentacion().getCircle(), pasajero.getEquipaje().getCircle());
         });
 
-        // Espera un segundo antes de quitar el equipaje y luego teletransportar al pasajero a la salida
+        // Lógica modificada para llamar al método de salida en lugar de manejarlo aquí
         new Thread(() -> {
             try {
                 Thread.sleep(1000); // Espera de 1 segundo
@@ -161,32 +161,7 @@ public class AeropuertoMonitor {
                     equipajeArea.getChildren().remove(pasajero.getEquipaje().getCircle());
                     pasajero.ModificarEquipaje(0, 0, false); // Opcional: actualizar estado del equipaje
                 });
-
-                // Espera un tiempo aleatorio entre 2 y 5 segundos para teletransportar al pasajero a la salida
-                int espera = new Random().nextInt(4) + 2; // genera un número entre 2 y 5
-                Thread.sleep(espera * 1000);
-
-                Platform.runLater(() -> {
-                    if (pasajero.getRepresentacion().getCircle().getParent() != null) {
-                        ((Pane) pasajero.getRepresentacion().getCircle().getParent()).getChildren().remove(pasajero.getRepresentacion().getCircle());
-                    }
-                    areaSalida.getChildren().add(pasajero.getRepresentacion().getCircle());
-                });
-
-                // Nueva lógica para eliminar al pasajero del área de salida tras 1-5 segundos
-                new Thread(() -> {
-                    try {
-                        // Espera un tiempo aleatorio entre 1 y 5 segundos
-                        int esperaSalida = new Random().nextInt(5) + 1; // genera un número entre 1 y 5
-                        Thread.sleep(esperaSalida * 1000);
-
-                        Platform.runLater(() -> {
-                            areaSalida.getChildren().remove(pasajero.getRepresentacion().getCircle());
-                        });
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                    }
-                }).start();
+                teletransportarASalida(pasajero); // Llamada al nuevo método
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
@@ -204,6 +179,41 @@ public class AeropuertoMonitor {
         AgenteEquipaje agenteAsignado = agentesEquipajeDisponibles.remove();
         teletransportarAgenteEquipaje(agenteAsignado, posicionEquipaje);
     }
+
+
+    public synchronized void teletransportarASalida(Pasajero pasajero) {
+        // Espera un tiempo aleatorio entre 2 y 5 segundos para teletransportar al pasajero a la salida
+        new Thread(() -> {
+            try {
+                int espera = new Random().nextInt(4) + 2; // genera un número entre 2 y 5
+                Thread.sleep(espera * 1000);
+
+                Platform.runLater(() -> {
+                    if (pasajero.getRepresentacion().getCircle().getParent() != null) {
+                        ((Pane) pasajero.getRepresentacion().getCircle().getParent()).getChildren().remove(pasajero.getRepresentacion().getCircle());
+                    }
+                    areaSalida.getChildren().add(pasajero.getRepresentacion().getCircle());
+                });
+
+                // Lógica para eliminar al pasajero del área de salida tras 1-5 segundos
+                new Thread(() -> {
+                    try {
+                        int esperaSalida = new Random().nextInt(5) + 1; // genera un número entre 1 y 5
+                        Thread.sleep(esperaSalida * 1000);
+
+                        Platform.runLater(() -> {
+                            areaSalida.getChildren().remove(pasajero.getRepresentacion().getCircle());
+                        });
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                }).start();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }).start();
+    }
+
 
 
 

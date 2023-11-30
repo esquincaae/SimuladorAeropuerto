@@ -21,6 +21,7 @@ public class AeropuertoMonitor {
     private final int maxAgentes = 10;
     private int pasajerosActuales = 0;
     private int agentesActuales = 0;
+    private int pasajerosEnZonaEquipaje = 0; // Nueva variable para rastrear pasajeros en la zona de equipaje
 
     private boolean[] posicionesEntrada = new boolean[maxPasajeros];
     private boolean[] posicionesPasaportes = new boolean[maxPasajeros];
@@ -153,6 +154,15 @@ public class AeropuertoMonitor {
             equipajeArea.getChildren().addAll(pasajero.getRepresentacion().getCircle(), pasajero.getEquipaje().getCircle());
         });
 
+        // Incrementar contador de pasajeros en la zona de equipaje
+        pasajerosEnZonaEquipaje++;
+
+        // Asignar un agente de equipaje al pasajero
+        AgenteEquipaje agenteAsignado = asignarAgenteEquipaje();
+        if (agenteAsignado != null) {
+            teletransportarAgenteEquipaje(agenteAsignado, posicionEquipaje);
+        }
+
         // Espera un segundo antes de quitar el equipaje y luego teletransportar al pasajero a la salida
         new Thread(() -> {
             try {
@@ -174,25 +184,36 @@ public class AeropuertoMonitor {
                 });
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
+            } finally {
+                synchronized (this) {
+                    pasajerosEnZonaEquipaje--; // Decrementar contador al retirar un pasajero de la zona de equipaje
+                    if (pasajerosEnZonaEquipaje == 0) {
+                        regresarAgentesEquipajeAEspera(); // Regresar agentes a la espera si no hay más pasajeros
+                    }
+                }
             }
         }).start();
+    }
 
+
+
+    private synchronized AgenteEquipaje asignarAgenteEquipaje() {
         while (agentesEquipajeDisponibles.isEmpty()) {
             try {
                 wait();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                return;
+                return null;
             }
         }
-
-        AgenteEquipaje agenteAsignado = agentesEquipajeDisponibles.remove();
-        teletransportarAgenteEquipaje(agenteAsignado, posicionEquipaje);
+        return agentesEquipajeDisponibles.remove();
     }
 
 
 
-    public synchronized void teletransportarAgenteEquipaje(AgenteEquipaje agente, int posicionEquipaje) {
+
+
+    public void teletransportarAgenteEquipaje(AgenteEquipaje agente, int posicionEquipaje) {
         int xPosition = 50 + posicionEquipaje * 30;
         int yPositionEquipaje = 80;
 
@@ -258,6 +279,19 @@ public class AeropuertoMonitor {
         notifyAll();
     }
 
-
+    private synchronized void regresarAgentesEquipajeAEspera() {
+        while (!agentesEquipajeDisponibles.isEmpty()) {
+            AgenteEquipaje agente = agentesEquipajeDisponibles.remove();
+            // Código para teletransportar al agente de vuelta a la zona de espera
+            int xPosition = 50 + agentesEquipajeActuales * 30;
+            int yPositionZonaEspera = 150;
+            agente.ModificarRepresentacion(xPosition, yPositionZonaEspera, true);
+            Platform.runLater(() -> {
+                equipajeArea.getChildren().remove(agente.getRepresentacion().getCircle());
+                zonaEspera.getChildren().add(agente.getRepresentacion().getCircle());
+            });
+            agentesEquipajeActuales--;
+        }
+    }
 
 }

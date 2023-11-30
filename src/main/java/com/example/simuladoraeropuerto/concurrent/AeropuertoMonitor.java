@@ -161,7 +161,7 @@ public class AeropuertoMonitor {
         Random random = new Random();
         int posicionEquipaje = random.nextInt(MAX_AGENTES_EQUIPAJE);
         int xPosition = 50 + posicionEquipaje * 30;
-        int yPositionEquipaje = 80; // Ajusta la posición Y según sea necesario para la zona de equipaje
+        int yPositionEquipaje = 120; // Posición Y ajustada para evitar superposición con los pasajeros
 
         // Actualiza la posición del agente
         agente.ModificarRepresentacion(xPosition, yPositionEquipaje, true);
@@ -187,7 +187,7 @@ public class AeropuertoMonitor {
 
         // Calcula la posición X para el agente en la zona de espera
         int xPosition = 50 + agentesEquipajeActuales * 30;
-        int yPositionZonaEspera = 150; // Ajusta la posición Y según sea necesario para la zona de espera
+        int yPositionZonaEspera = 200; // Posición Y ajustada para evitar superposición con los pasajeros
 
         // Modifica la representación del agente para moverlo a la zona de espera
         agente.ModificarRepresentacion(xPosition, yPositionZonaEspera, true);
@@ -211,7 +211,6 @@ public class AeropuertoMonitor {
             }
         }).start();
     }
-
 
 
 

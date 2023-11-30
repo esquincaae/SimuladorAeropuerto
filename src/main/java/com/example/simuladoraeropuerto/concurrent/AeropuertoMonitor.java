@@ -203,6 +203,30 @@ public class AeropuertoMonitor {
             }
             equipajeArea.getChildren().add(agente.getRepresentacion().getCircle());
         });
+
+        // Nueva lógica para que el agente regrese a la zona de espera
+        new Thread(() -> {
+            try {
+                // Espera un tiempo aleatorio entre 2 y 5 segundos
+                int espera = new Random().nextInt(4) + 2; // genera un número entre 2 y 5
+                Thread.sleep(espera * 1000);
+
+                Platform.runLater(() -> {
+                    if (agente.getRepresentacion().getCircle().getParent() != null) {
+                        ((Pane) agente.getRepresentacion().getCircle().getParent()).getChildren().remove(agente.getRepresentacion().getCircle());
+                    }
+                    zonaEspera.getChildren().add(agente.getRepresentacion().getCircle());
+                });
+
+                // Actualizar la cola de agentes disponibles
+                synchronized (AeropuertoMonitor.this) {
+                    agentesEquipajeDisponibles.add(agente);
+                    notifyAll(); // Notificar que hay un agente disponible
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }).start();
     }
 
     public synchronized void entrarAgenteEquipaje(AgenteEquipaje agente) {

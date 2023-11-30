@@ -156,38 +156,63 @@ public class AeropuertoMonitor {
         }
     }
 
+    public synchronized void teletransportarAgenteEquipaje(AgenteEquipaje agente) {
+        // Calcula una posición aleatoria en la zona de equipaje
+        Random random = new Random();
+        int posicionEquipaje = random.nextInt(MAX_AGENTES_EQUIPAJE);
+        int xPosition = 50 + posicionEquipaje * 30;
+        int yPositionEquipaje = 80; // Ajusta la posición Y según sea necesario para la zona de equipaje
 
-    public synchronized void salirPasajero(Pasajero pasajero) {
+        // Actualiza la posición del agente
+        agente.ModificarRepresentacion(xPosition, yPositionEquipaje, true);
+
+        // Actualiza la UI en el hilo de JavaFX
         Platform.runLater(() -> {
-            // Remoción del pasajero y su equipaje
-            // airportArea.getChildren().removeAll(pasajero.getRepresentacion(), pasajero.getEquipaje());
+            if (agente.getRepresentacion().getCircle().getParent() != null) {
+                ((Pane) agente.getRepresentacion().getCircle().getParent()).getChildren().remove(agente.getRepresentacion().getCircle());
+            }
+            equipajeArea.getChildren().add(agente.getRepresentacion().getCircle());
         });
-        pasajerosActuales--;
-        notifyAll(); // Notificar a otros hilos que hay espacio
     }
-
     public synchronized void entrarAgenteEquipaje(AgenteEquipaje agente) {
+        // Espera si el área de la zona de espera está llena
         while (agentesEquipajeActuales >= MAX_AGENTES_EQUIPAJE) {
             try {
-                wait(); // Esperar si el área está llena
+                wait();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
+                return;
             }
         }
 
-        // Calcula la posición X para el agente de equipaje
+        // Calcula la posición X para el agente en la zona de espera
         int xPosition = 50 + agentesEquipajeActuales * 30;
+        int yPositionZonaEspera = 150; // Ajusta la posición Y según sea necesario para la zona de espera
 
-        // Modificar la representación del agente para moverlo a la zona de espera
-        agente.ModificarRepresentacion(xPosition, 150, true); // Ajusta la posición Y según sea necesario
+        // Modifica la representación del agente para moverlo a la zona de espera
+        agente.ModificarRepresentacion(xPosition, yPositionZonaEspera, true);
 
-        // Añadir el agente a la zona de espera
+        // Añade el agente a la zona de espera
         Platform.runLater(() -> {
             zonaEspera.getChildren().add(agente.getRepresentacion().getCircle());
         });
 
         agentesEquipajeActuales++;
+
+        // Crea un hilo para mover aleatoriamente al agente a la zona de equipaje
+        new Thread(() -> {
+            try {
+                while (true) {
+                    Thread.sleep((new Random().nextInt(5) + 1) * 1000); // Espera aleatoria entre 1 y 5 segundos
+                    teletransportarAgenteEquipaje(agente);
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }).start();
     }
+
+
 
 
     public synchronized void entrarAgentePasaporte(AgentePasaporte agente) {

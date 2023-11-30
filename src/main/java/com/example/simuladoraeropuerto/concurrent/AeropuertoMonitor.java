@@ -8,6 +8,7 @@ import javafx.scene.layout.Pane;
 
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.Random;
 
 public class AeropuertoMonitor {
     private final Pane airportArea;
@@ -56,6 +57,7 @@ public class AeropuertoMonitor {
             airportArea.getChildren().removeAll(pasajero.getRepresentacion().getCircle(), pasajero.getEquipaje().getCircle());
             controlPasaportesArea.getChildren().addAll(pasajero.getRepresentacion().getCircle(), pasajero.getEquipaje().getCircle());
         });
+
         int yAgentePosition = 120;
         while (agentesPasaportesDisponibles.isEmpty()) {
             try {
@@ -68,7 +70,27 @@ public class AeropuertoMonitor {
 
         AgentePasaporte agenteAsignado = agentesPasaportesDisponibles.remove();
         teletransportarAgentePasaportes(agenteAsignado, xPosition, yAgentePosition);
+
+        // Nueva lógica para regresar al agente a la zona de espera
+        new Thread(() -> {
+            try {
+                Thread.sleep((new Random().nextInt(5) + 1) * 1000); // Espera de 1 a 5 segundos
+                regresarAgenteAEspera(agenteAsignado);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }).start();
     }
+
+    private synchronized void regresarAgenteAEspera(AgentePasaporte agente) {
+        Platform.runLater(() -> {
+            controlPasaportesArea.getChildren().remove(agente.getRepresentacion().getCircle());
+            zonaEspera.getChildren().add(agente.getRepresentacion().getCircle());
+        });
+        agentesPasaportesDisponibles.add(agente);
+        notifyAll(); // Notificar a otros hilos que hay un agente disponible
+    }
+
 
     public void teletransportarAgentePasaportes(AgentePasaporte agente, int x, int y) {
         agente.ModificarRepresentacion(x, y, true);

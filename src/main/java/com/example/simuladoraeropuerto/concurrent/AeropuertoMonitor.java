@@ -107,7 +107,6 @@ public class AeropuertoMonitor {
     }
 
 
-
     public void teletransportarAgentePasaportes(AgentePasaporte agente, int x, int y) {
         agente.ModificarRepresentacion(x, y, true);
         Platform.runLater(() -> {
@@ -193,6 +192,56 @@ public class AeropuertoMonitor {
         if (pasajero.getAgenteAsignado() != null) {
             regresarAgenteAEspera(pasajero.getAgenteAsignado());
             pasajero.setAgenteAsignado(null); // Resetea el agente asignado del pasajero
+        }
+    }
+
+    private void asignarYTeletransportarAgenteEquipaje(Pasajero pasajero, int xPosition, int yPosition) {
+        synchronized (this) {
+            while (agentesEquipajeDisponibles.isEmpty()) {
+                try {
+                    wait();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    return;
+                }
+            }
+
+            AgenteEquipaje agenteAsignado = agentesEquipajeDisponibles.remove();
+            teletransportarAgenteEquipaje(agenteAsignado, xPosition, yPosition); // Método para mover al agente
+        }
+    }
+
+    public synchronized void teletransportarAgenteEquipaje(AgenteEquipaje agente, int x, int y) {
+        agente.ModificarRepresentacion(x, y, true);
+        Platform.runLater(() -> {
+            if (agente.getRepresentacion().getCircle().getParent() != null) {
+                ((Pane) agente.getRepresentacion().getCircle().getParent()).getChildren().remove(agente.getRepresentacion().getCircle());
+            }
+            equipajeArea.getChildren().add(agente.getRepresentacion().getCircle());
+        });
+
+        // Nueva lógica para que el agente regrese a la zona de espera
+        new Thread(() -> {
+            try {
+                Thread.sleep(2000); // Espera de 2 segundos antes de regresar
+                regresarAgenteAEsperaEquipaje(agente);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }).start();
+    }
+
+    private void regresarAgenteAEsperaEquipaje(AgenteEquipaje agente) {
+        Platform.runLater(() -> {
+            if (agente.getRepresentacion().getCircle().getParent() != null) {
+                ((Pane) agente.getRepresentacion().getCircle().getParent()).getChildren().remove(agente.getRepresentacion().getCircle());
+            }
+            zonaEspera.getChildren().add(agente.getRepresentacion().getCircle());
+        });
+
+        synchronized (this) {
+            agentesEquipajeDisponibles.add(agente);
+            notifyAll();
         }
     }
 

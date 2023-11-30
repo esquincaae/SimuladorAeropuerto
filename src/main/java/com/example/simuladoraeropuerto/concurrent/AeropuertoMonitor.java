@@ -172,6 +172,21 @@ public class AeropuertoMonitor {
                     }
                     areaSalida.getChildren().add(pasajero.getRepresentacion().getCircle());
                 });
+
+                // Nueva lógica para eliminar al pasajero del área de salida tras 1-5 segundos
+                new Thread(() -> {
+                    try {
+                        // Espera un tiempo aleatorio entre 1 y 5 segundos
+                        int esperaSalida = new Random().nextInt(5) + 1; // genera un número entre 1 y 5
+                        Thread.sleep(esperaSalida * 1000);
+
+                        Platform.runLater(() -> {
+                            areaSalida.getChildren().remove(pasajero.getRepresentacion().getCircle());
+                        });
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                }).start();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
@@ -189,6 +204,7 @@ public class AeropuertoMonitor {
         AgenteEquipaje agenteAsignado = agentesEquipajeDisponibles.remove();
         teletransportarAgenteEquipaje(agenteAsignado, posicionEquipaje);
     }
+
 
 
 

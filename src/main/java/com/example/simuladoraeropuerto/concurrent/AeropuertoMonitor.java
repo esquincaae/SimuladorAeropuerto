@@ -92,9 +92,8 @@ public class AeropuertoMonitor {
             zonaEspera.getChildren().add(agente.getRepresentacion().getCircle());
         });
         agentesPasaportesDisponibles.add(agente);
-        notifyAll(); // Notificar a otros hilos que hay un agente disponible
+        notifyAll(); // Notificar que hay un agente disponible
     }
-
     public void teletransportarAgentePasaportes(AgentePasaporte agente, int x, int y) {
         agente.ModificarRepresentacion(x, y, true);
         Platform.runLater(() -> {
@@ -149,14 +148,13 @@ public class AeropuertoMonitor {
             equipajeArea.getChildren().addAll(pasajero.getRepresentacion().getCircle(), pasajero.getEquipaje().getCircle());
         });
 
-        // Comprueba si el pasajero tiene un agente asignado y si es así, devuelve el agente a la zona de espera
+        // Regresar al agente de pasaportes a la zona de espera cuando el pasajero se mueve al área de equipaje
         AgentePasaporte agenteAsignado = pasajero.getAgenteAsignado();
         if (agenteAsignado != null) {
             regresarAgenteAEspera(agenteAsignado);
-            pasajero.setAgenteAsignado(null); // Eliminar la referencia al agente del pasajero
+            pasajero.setAgenteAsignado(null); // Quitar la asignación del agente al pasajero
         }
     }
-
 
 
     public synchronized void salirPasajero(Pasajero pasajero) {
